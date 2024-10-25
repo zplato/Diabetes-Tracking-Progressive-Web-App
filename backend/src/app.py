@@ -32,6 +32,10 @@ users_db = {
     }
 }
 
+# Endpoint to validate the user login
+# can be tested with curl - curl -X POST http://127.0.0.1:5000/validateUserLogin \
+# -H "Content-Type: application/json" \
+# -d '{"username": "user1", "password": "password123"}'
 class ValidateUserLogin(Resource):
     def post(self):
         data = request.get_json()
@@ -61,6 +65,7 @@ api.add_resource(ValidateUserLogin, '/validateUserLogin')
 
 
 # Starts the Flask Application in Debug Mode
+# Run this file and open a browser to view, go to the following default http://Hostname:Port
 # Hostname:Port -  http://localhost:5000 || http://127.0.0.1:5000
 if __name__ == '__main__':
     app.run(debug=True)
