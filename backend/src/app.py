@@ -10,6 +10,10 @@ api = Api(app)
 
 
 # Home Route
+# Don't touch this, lets leave as is until we have reason not to.
 @app.route('/')
 def hello_world():
-    return 'Hello, World!'
+    return 'CS6440 Team 62 Group Project! Fall 2024.'
+
+
+
