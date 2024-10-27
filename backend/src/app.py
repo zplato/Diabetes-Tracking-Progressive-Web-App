@@ -83,9 +83,21 @@ class ValidateUserLogin(Resource):
         else:
             return {"message": "Invalid username or password"}, 401
 
+class TestEnvironment(Resource):
+    def get(self):
+        # Return a safe subset of environment variables
+        # Don't return passwords or sensitive data!
+        return {
+            "ENVIRONMENT": os.getenv('ENVIRONMENT', 'Not set'),
+            "database_host": os.getenv('MYSQL_DATABASE_HOST', 'Not set'),
+            "database_name": os.getenv('MYSQL_DATABASE_DB', 'Not set'),
+            "database_user": os.getenv('MYSQL_DATABASE_USER', 'Not set'),
+            # Don't include DATABASE_PASSWORD!
+        }, 200
 
 # Add resources to api
 api.add_resource(ValidateUserLogin, '/validateUserLogin')
+api.add_resource(TestEnvironment, '/testEnv')
 
 
 # Starts the Flask Application in Debug Mode
