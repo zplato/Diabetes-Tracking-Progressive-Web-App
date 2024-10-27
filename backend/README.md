@@ -20,7 +20,7 @@ Apply your database credentials using your preferred SQL client. If you get the 
 <img width="492" alt="CleanShot 2024-10-27 at 21 58 23@2x" src="https://github.com/user-attachments/assets/50ff8c1d-d735-4e87-9f2a-04a1aabd7d2c">
 <img width="830" alt="CleanShot 2024-10-27 at 22 00 12@2x" src="https://github.com/user-attachments/assets/0707dae0-a73d-47f1-8e5c-2d80ab204331">
 
-#### Remote Database Connection Confirmation
+### Remote Database Initialization
 **Loading Environment Variables**: The `load_dotenv()` function loads the environment variables from the .env file located in the src directory.
 
 **Configuring SQLAlchemy**: The `SQLALCHEMY_DATABASE_URI` is constructed using the loaded environment variables. This URI specifies the database driver, username, password, host, and database name.
