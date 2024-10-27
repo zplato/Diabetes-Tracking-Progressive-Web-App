@@ -9,7 +9,6 @@ import os
 # Local Imports
 from db import db, check_connection
 
-
 # Flask Stuff
 app = Flask(__name__)
 CORS(app)
@@ -23,14 +22,10 @@ load_dotenv(dotenv_path)
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     f"mysql+mysqlconnector://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
     f"{os.getenv('MYSQL_DATABASE_HOST')}:3306/{os.getenv('MYSQL_DATABASE_DB')}")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Not using the Flask-SQLAlchemy's event system, set explicitly to false in order to get rid of warning
-
-# Bind the app to the db instance
-db.init_app(app)
-
-# Verify the database connection
-is_connected, message = check_connection(app)
-print(message) # should write this to a logfile but printing to the STDOUT is fine for now
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    # Not using the Flask-SQLAlchemy's event system, set explicitly to false in order to get rid of warning
+db.init_app(app)                                        # Bind the app to the db instance
+is_connected, message = check_connection(app)           # Verify the database connection
+print(message)                                          # Printing to the STDOUT is fine for now
 
 
 # Home Route
@@ -95,7 +90,9 @@ class TestEnvironment(Resource):
             # Don't include DATABASE_PASSWORD!
         }, 200
 
-# Add resources to api
+###########################
+#    Add API Resources    #
+###########################
 api.add_resource(ValidateUserLogin, '/validateUserLogin')
 api.add_resource(TestEnvironment, '/testEnv')
 
