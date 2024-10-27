@@ -1,5 +1,8 @@
-import unittest
+# External Imports
 import json
+import unittest
+
+# Internal Imports
 from src.app import app
 
 class testBackendEndpoints(unittest.TestCase):

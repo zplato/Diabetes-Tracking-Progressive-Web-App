@@ -1,17 +1,31 @@
+# External Imports
+from dotenv import load_dotenv
 from flask import Flask, request
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
-from dotenv import load_dotenv
 import os
 
-# Load environment variables
-load_dotenv()  # This will load .env file if it exists
+# Local Imports
+from db import db, check_connection
 
 # Flask Stuff
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+
+# Load environment variables from .env file
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(dotenv_path)
+
+# Configure database connection
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"mysql+mysqlconnector://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
+    f"{os.getenv('MYSQL_DATABASE_HOST')}:3306/{os.getenv('MYSQL_DATABASE_DB')}")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    # Not using the Flask-SQLAlchemy's event system, set explicitly to false in order to get rid of warning
+db.init_app(app)                                        # Bind the app to the db instance
+is_connected, message = check_connection(app)           # Verify the database connection
+print(message)                                          # Printing to the STDOUT is fine for now
 
 
 # Home Route
@@ -76,7 +90,9 @@ class TestEnvironment(Resource):
             # Don't include DATABASE_PASSWORD!
         }, 200
 
-# Add resources to api
+###########################
+#    Add API Resources    #
+###########################
 api.add_resource(ValidateUserLogin, '/validateUserLogin')
 api.add_resource(TestEnvironment, '/testEnv')
 
