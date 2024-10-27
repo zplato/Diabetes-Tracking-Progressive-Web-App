@@ -15,7 +15,7 @@ class TestDatabaseConnection(unittest.TestCase):
         cls.app = Flask(__name__)
 
         # Load environment variables from .env file
-        dotenv_path = os.path.join(os.path.dirname(__file__), '..', 'src', '.env')
+        dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
         load_dotenv(dotenv_path)
 
         # Configure test database (ensure this is a valid test database)
