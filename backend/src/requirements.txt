@@ -1,8 +1,8 @@
-dotenv
 Flask
 flask-cors
 flask_sqlalchemy
 flask_restful
 Gunicorn
 mysql-connector-python
+python-dotenv
 werkzeug
