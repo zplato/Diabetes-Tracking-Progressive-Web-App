@@ -2,6 +2,9 @@
 import json
 import unittest
 
+from jinja2.compiler import generate
+from werkzeug.security import generate_password_hash
+
 # Internal Imports
 from src.app import app
 
@@ -26,7 +29,7 @@ class testBackendEndpoints(unittest.TestCase):
     # test @app.route('/validateUserLogin')
     def test_login_success(self):
         response = self.app.post('/validateUserLogin',
-                                 data=json.dumps({"username": "user1", "password": "password123"}),
+                                 data=json.dumps({"username": "Annatar", "password": "IAmSauron"}),
                                  content_type='application/json')
         self.assertEqual(response.status_code, 200)
         self.assertIn("Login successful", response.get_data(as_text=True))
@@ -40,7 +43,7 @@ class testBackendEndpoints(unittest.TestCase):
 
     def test_login_invalid_password(self):
         response = self.app.post('/validateUserLogin',
-                                 data=json.dumps({"username": "user1", "password": "wrongpassword"}),
+                                 data=json.dumps({"username": "RingsBearerSidekick", "password": "wrongpassword"}),
                                  content_type='application/json')
         self.assertEqual(response.status_code, 401)
         self.assertIn("Invalid username or password", response.get_data(as_text=True))
