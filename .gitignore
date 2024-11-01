@@ -38,6 +38,8 @@ wheels/
 *.egg
 MANIFEST
 *.env
+venv/
+backend/src/__pycache__
 
 # MacOS
 .DS_Store
