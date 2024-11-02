@@ -3,10 +3,12 @@ from dotenv import load_dotenv
 from flask import Flask, request
 from flask_restful import Api, Resource
 from flask_cors import CORS
+from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
 # Local Imports
+from common_utils import valid_dob
 from db import db, check_connection
 from models import Account
 
@@ -18,6 +20,11 @@ api = Api(app)
 # Load environment variables from .env file
 dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path)
+
+# Global Default Vars
+default_rank = "Bronze"
+default_num_points = 0
+
 
 ###########################
 #      Database Init      #
@@ -66,6 +73,57 @@ class ValidateUserLogin(Resource):
         else:
             return {"message": "Invalid username or password"}, 401
 
+class CreateUserAccount(Resource):
+    def post(self):
+
+        # Extract Data from Request
+        data = request.get_json()
+        username = data.get("username")
+        password = data.get("password")
+        firstname = data.get("firstname")
+        middlename = data.get("middlename", '') # Optional, This will be an empty string if 'middlename' is not present
+        lastname = data.get("lastname")
+        dob = data.get('dob') # Date of Birth, should be passed in format its stored in, e.g., YYYY-MM-DD
+
+        # Validate input
+        # This is the last line of defense, frontend should ensure users are not submitting request -
+        # without all required fields present.
+        if not username or not password or not firstname or not lastname or not dob:
+            invalid_input_message = ("Not all required fields are present. "
+                       "Ensure username, password, firstname, lastname, and dob are passed as part of the request.")
+            return {"message": invalid_input_message }, 400
+
+        # Validate username - check if it already exists
+        # Query the database for the user using SQLAlchemy ORM
+        user = Account.query.filter_by(username=username).first()
+        if user:
+            already_existing_user_message = "Username already exists"
+            return {"message": already_existing_user_message}, 409 # Conflict - username already exists
+
+        # Validate dob
+        if not valid_dob(dob):
+            not_valid_dob_message = "Not a valid dob, ensure its formatted as YYYY-MM-DD"
+            return {"message": not_valid_dob_message}, 400
+
+        # At this point, everything is gucci - lets create that user!
+        hashed_password = generate_password_hash(password)
+        new_user = Account(
+            username=username,
+            password=hashed_password,
+            firstname=firstname,
+            middlename=middlename,
+            lastname=lastname,
+            dob=dob
+        )
+
+        # Add the new user to the session and commit
+        db.session.add(new_user)
+        try:
+            db.session.commit()
+            return {"message": "User created successfully"}, 201  # Created
+        except IntegrityError:
+            db.session.rollback()
+            return {"message": "Error creating user. Please try again."}, 500  # Internal Server Error
 
 class TestEnvironment(Resource):
     def get(self):
