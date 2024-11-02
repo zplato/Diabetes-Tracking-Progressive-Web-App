@@ -27,6 +27,7 @@ class TestDatabaseConnection(unittest.TestCase):
         # Initialize the database with the app context
         with cls.app.app_context():
             db.init_app(cls.app)
+
     # Check Database Connection
     def test_database_connection(self):
         is_connected, message = check_connection(self.app)

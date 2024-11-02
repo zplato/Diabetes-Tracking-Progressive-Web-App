@@ -1,4 +1,6 @@
 # External Imports
+from datetime import datetime
+from flask import Flask
 import json
 import unittest
 
@@ -6,7 +8,10 @@ from jinja2.compiler import generate
 from werkzeug.security import generate_password_hash
 
 # Internal Imports
+from db import db
+from models import Account
 from src.app import app
+
 
 class testBackendEndpoints(unittest.TestCase):
 
@@ -55,6 +60,31 @@ class testBackendEndpoints(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Username and password are required", response.get_data(as_text=True))
 
+class TestCreateUserAccount(unittest.TestCase):
+    def setUp(self):
+        self.app = app.test_client()
+        self.app.testing = True
+
+    def tearDown(self):
+        pass
+
+    def test_create_user_success(self):
+        data = {
+            "username": "testuser",
+            "password": "testpassword",
+            "firstname": "Test",
+            "lastname": "User",
+            "dob": "1990-01-01"
+        }
+        response = self.app.post('/createUserAccount', json=data)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json['message'], 'User created successfully')
+
+        user = Account.query.filter_by(username='testuser').first()
+        self.assertIsNotNone(user)
+        self.assertEqual(user.firstname, 'Test')
+        self.assertEqual(user.lastname, 'User')
+        self.assertEqual(user.dob, datetime.date(1990, 1, 1))
 
 if __name__ == '__main__':
     unittest.main()

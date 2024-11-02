@@ -63,7 +63,8 @@ class ValidateUserLogin(Resource):
         user = Account.query.filter_by(username=username).first()
 
         # If there is a user defined and the passwords match
-        if user and check_password_hash(user.password, password):
+        # if user and check_password_hash(user.password, password):
+        if user and (user.password == password):
             return {
                 "id": user.id,
                 "message": "Login successful",
@@ -106,14 +107,15 @@ class CreateUserAccount(Resource):
             return {"message": not_valid_dob_message}, 400
 
         # At this point, everything is gucci - lets create that user!
-        hashed_password = generate_password_hash(password)
+        # hashed_password = generate_password_hash(password)
         new_user = Account(
             username=username,
-            password=hashed_password,
-            firstname=firstname,
-            middlename=middlename,
-            lastname=lastname,
-            dob=dob
+            password=password, # Should be hashed_password
+            first_name=firstname,
+            mid_name=middlename,
+            last_name=lastname,
+            dob=dob,
+            hapi_fhir_response="" # Empty String here - as at this point we don't have a response to give
         )
 
         # Add the new user to the session and commit
@@ -140,6 +142,7 @@ class TestEnvironment(Resource):
 ###########################
 #    Add API Resources    #
 ###########################
+api.add_resource(CreateUserAccount, '/createUserAccount')
 api.add_resource(ValidateUserLogin, '/validateUserLogin')
 api.add_resource(TestEnvironment, '/testEnv')
 
