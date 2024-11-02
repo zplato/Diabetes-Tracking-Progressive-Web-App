@@ -45,7 +45,7 @@ backend/src/__pycache__
 .DS_Store
 
 # Node Stuff
-/node_modules
+node_modules
 /.pnp
 .pnp.js
 /coverage
@@ -57,3 +57,13 @@ backend/src/__pycache__
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Conda Stuff
+conda-meta
+bin/
+etc/
+include/
+man/
+share/
+ssl/
+__pycache__
