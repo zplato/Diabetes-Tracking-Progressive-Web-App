@@ -30,16 +30,13 @@ default_rank = "Bronze"
 default_num_points = 0
 db_initialized = False
 
-print("Made it here #1")
-
 ###########################
 #      Database Init      #
 ###########################
 def init_db(env):
-    print("Made it here #3")
+    print("Initializing DB")
     if 'SQLALCHEMY_DATABASE_URI' not in app.config: # If we don't already have a db for this sessions context
         # Production 'MySQL' Database
-        print("Made it here #4")
         if env == 'PROD':
             SQLALCHEMY_DATABASE_URI = (
             f"mysql+mysqlconnector://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
@@ -299,7 +296,7 @@ api.add_resource(TestEnvironment, '/testEnv')
 # Run this file and open a browser to view, go to the following default http://Hostname:Port
 # Hostname:Port -  http://localhost:5000 || http://127.0.0.1:5000
 def main():
-    print("Made it here #2")
+    print("Running Locally")
     with app.app_context():
         init_db(environment)
         app.run(debug=True)
@@ -310,6 +307,7 @@ if __name__ == '__main__':
 # Initialization for Render
 # Render doesn't utilize 'main()' function,it runs gunicorn app:app directly
 if not db_initialized:
+    print("Running on PROD - Render Instance")
     with app.app_context():
         init_db(environment)
 
