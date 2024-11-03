@@ -94,7 +94,9 @@ class UserBgInsResource(Resource):
                 # Verify account exists
                 account = Account.query.get(account_id)
                 if not account:
-                    return {'message': f'Account with id {account_id} not found'}, 404
+                    return {
+                        'message': f'Invalid account_id: {account_id}'
+                    }, 400
                 query = query.filter_by(account_id=account_id)
             entries = query.order_by(UserBgIns.created_at.desc()).all()
             return [{
@@ -119,7 +121,9 @@ class UserBgInsResource(Resource):
         
         account = Account.query.get(data['account_id'])
         if not account:
-            return {'message': f'Account with id {data["account_id"]} not found'}, 404
+             return {
+                'message': f'Invalid account_id: {data["account_id"]}'
+            }, 400
 
         # Create new entry
         new_entry = UserBgIns(
@@ -150,7 +154,9 @@ class UserBgInsResource(Resource):
         if 'account_id' in data:
             account = Account.query.get(data['account_id'])
             if not account:
-                return {'message': f'Account with id {data["account_id"]} not found'}, 404
+                return {
+                    'message': f'Invalid account_id: {data["account_id"]}'
+                }, 400
 
         # Update fields if provided
         if 'bg_morning' in data:
