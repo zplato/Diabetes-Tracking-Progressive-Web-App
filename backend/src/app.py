@@ -29,13 +29,30 @@ default_num_points = 0
 ###########################
 #      Database Init      #
 ###########################
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f"mysql+mysqlconnector://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
-    f"{os.getenv('MYSQL_DATABASE_HOST')}:3306/{os.getenv('MYSQL_DATABASE_DB')}")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    # Not using the Flask-SQLAlchemy's event system, set explicitly to false in order to get rid of warning
-db.init_app(app)                                        # Bind the app to the db instance
-is_connected, message = check_connection(app)           # Verify the database connection
-print(message)                                          # Printing to the STDOUT is fine for now
+def init_db(env):
+    if 'SQLALCHEMY_DATABASE_URI' not in app.config: # If we don't already have a db for this sessions context
+        # Production 'MySQL' Database
+        if env == 'PROD':
+            SQLALCHEMY_DATABASE_URI = (
+            f"mysql+mysqlconnector://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
+            f"{os.getenv('MYSQL_DATABASE_HOST')}:3306/{os.getenv('MYSQL_DATABASE_DB')}")
+        # Test - Dynamic 'in-memory sqlite' database
+        elif env == 'TEST':
+            SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # Use an in-memory SQLite database
+        # UNSUPPORTED DATABASE!
+        else:
+            print("ERROR: ENVIRONMENT " + env + "is unsupported! Currently only supporting \'PROD\' or \'TEST\'.")
+            print("Check your .env file and ensure that you've specified the correct environment and try again. ")
+            exit(1)
+
+        app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    # Not using the Flask-SQLAlchemy's event system, set explicitly to false in order to get rid of warning
+        db.init_app(app)                                        # Bind the app to the db instance
+
+    is_connected, message = check_connection(app)           # Verify the database connection
+    print(message)                                          # Printing to the STDOUT is fine for now
+
+#--- End DB init ---#
 
 # Home Route
 # Don't touch this, lets leave as is until we have reason not to.
@@ -63,8 +80,7 @@ class ValidateUserLogin(Resource):
         user = Account.query.filter_by(username=username).first()
 
         # If there is a user defined and the passwords match
-        # if user and check_password_hash(user.password, password):
-        if user and (user.password == password):
+        if user and check_password_hash(user.password, password):
             return {
                 "id": user.id,
                 "message": "Login successful",
@@ -102,19 +118,20 @@ class CreateUserAccount(Resource):
             return {"message": already_existing_user_message}, 409 # Conflict - username already exists
 
         # Validate dob
-        if not valid_dob(dob):
+        is_valid_dob, formatted_dob = valid_dob(dob)
+        if not is_valid_dob:
             not_valid_dob_message = "Not a valid dob, ensure its formatted as YYYY-MM-DD"
             return {"message": not_valid_dob_message}, 400
 
         # At this point, everything is gucci - lets create that user!
-        # hashed_password = generate_password_hash(password)
+        hashed_password = generate_password_hash(password)
         new_user = Account(
             username=username,
-            password=password, # Should be hashed_password
+            password=hashed_password,
             first_name=firstname,
             mid_name=middlename,
             last_name=lastname,
-            dob=dob,
+            dob=formatted_dob,
             hapi_fhir_response="" # Empty String here - as at this point we don't have a response to give
         )
 
@@ -151,7 +168,12 @@ api.add_resource(TestEnvironment, '/testEnv')
 # Run this file and open a browser to view, go to the following default http://Hostname:Port
 # Hostname:Port -  http://localhost:5000 || http://127.0.0.1:5000
 if __name__ == '__main__':
-    app.run(debug=True)
+    environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Connected to the MySQL DB
+                                            # TEST = Local Development and Test, using in-memory SQL-Lite DB.
+                                            # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
+    with app.app_context():
+        init_db(environment)
+        app.run(debug=True)
 
 
 

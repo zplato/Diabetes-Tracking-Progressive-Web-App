@@ -8,7 +8,7 @@ from datetime import datetime
 # Example False - "1995-April-23"
 def valid_dob(dob_str):
     try:
-        datetime.strptime(dob_str, '%Y-%m-%d')
-        return True
+        dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
+        return True, dob
     except ValueError:
-        return False
+        return False, None

@@ -6,31 +6,34 @@ import unittest
 
 # Internal Imports
 from db import db, check_connection
+from src.app import app, init_db
 
 class TestDatabaseConnection(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
-        # Create a test Flask app
-        cls.app = Flask(__name__)
+    def setUpClass(self):
+        """Set up the testing environment."""
+        self.app = app
+        self.app.config['TESTING'] = True  # Enable testing mode
+        self.client = self.app.test_client()
 
-        # Load environment variables from .env file
-        dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
-        load_dotenv(dotenv_path)
+    def tearDown(self):
+        """Clean up after each test."""
+        with self.app.app_context():
+            db.session.remove()
 
-        # Configure test database (ensure this is a valid test database)
-        cls.app.config['SQLALCHEMY_DATABASE_URI'] = (
-        f"mysql+mysqlconnector://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
-        f"{os.getenv('MYSQL_DATABASE_HOST')}:3306/{os.getenv('MYSQL_DATABASE_DB')}")
-        cls.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    # Check PROD Database Connection
+    def test_PROD_database_connection(self):
+        with self.app.app_context():
+            init_db("PROD")
+            is_connected, message = check_connection(self.app)
+        self.assertTrue(is_connected, msg=message)
 
-        # Initialize the database with the app context
-        with cls.app.app_context():
-            db.init_app(cls.app)
-
-    # Check Database Connection
-    def test_database_connection(self):
-        is_connected, message = check_connection(self.app)
+    # Check TEST Database Connection
+    def test_TEST_database_connection(self):
+        with self.app.app_context():
+            init_db("TEST")
+            is_connected, message = check_connection(self.app)
         self.assertTrue(is_connected, msg=message)
 
 if __name__ == '__main__':

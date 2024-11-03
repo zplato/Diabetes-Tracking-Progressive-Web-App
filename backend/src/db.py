@@ -7,13 +7,25 @@ db = SQLAlchemy()
 
 # Verify connectivity to the database
 def check_connection(app):
-    with app.app_context():
-        try:
-            # Get a connection from the engine and execute a simple query
-            with db.engine.connect() as connection:
-                connection.execute(text("SELECT 1"))
-            return True, "Database connection is successful."
-        except OperationalError as e:
-            return False, f"Database connection failed: {str(e)}"
-        except Exception as e:
-            return False, f"An error occurred: {str(e)}"
+
+    database_type = get_database_type(app)
+    try:
+        # Get a connection from the engine and execute a simple query
+        with db.engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return True, "Database connection is successful. Connected to " + database_type
+    except OperationalError as e:
+        return False, f"Database connection failed: {str(e)}"
+    except Exception as e:
+        return False, f"An error occurred: {str(e)}"
+
+def get_database_type(app):
+    """Return the type of database being used."""
+    database_uri = app.config['SQLALCHEMY_DATABASE_URI']
+
+    if database_uri.startswith('sqlite'):
+        return 'SQLite'
+    elif database_uri.startswith('mysql'):
+        return 'MySQL'
+    else:
+        return 'Unknown Database'
