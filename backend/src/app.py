@@ -28,7 +28,7 @@ load_dotenv(dotenv_path)
 default_rank = "Bronze"
 default_num_points = 0
 
-print("Made it here #2")
+print("Made it here #1")
 
 ###########################
 #      Database Init      #
@@ -294,14 +294,17 @@ api.add_resource(TestEnvironment, '/testEnv')
 # Starts the Flask Application in Debug Mode
 # Run this file and open a browser to view, go to the following default http://Hostname:Port
 # Hostname:Port -  http://localhost:5000 || http://127.0.0.1:5000
-if __name__ == '__main__':
-    print("Made it here #1")
+def main():
+    print("Made it here #2")
     environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Connected to the MySQL DB
                                             # TEST = Local Development and Test, using in-memory SQL-Lite DB.
                                             # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
     with app.app_context():
         init_db(environment)
         app.run(debug=True)
+
+if __name__ == '__main__':
+    main()
 
 
 
