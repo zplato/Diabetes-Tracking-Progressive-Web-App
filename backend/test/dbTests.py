@@ -8,6 +8,7 @@ import unittest
 from db import db, check_connection
 from src.app import app, init_db
 
+# Note - the two tests in here need to be ran independently to work properly
 class TestDatabaseConnection(unittest.TestCase):
 
     @classmethod

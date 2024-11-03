@@ -5,12 +5,15 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+from decimal import Decimal
 import os
 
 # Local Imports
 from common_utils import valid_dob
 from db import db, check_connection
-from models import Account
+from models import Account, UserBgIns
+
 
 # Flask Stuff
 app = Flask(__name__)
@@ -144,6 +147,126 @@ class CreateUserAccount(Resource):
             db.session.rollback()
             return {"message": "Error creating user. Please try again."}, 500  # Internal Server Error
 
+class UserBgInsResource(Resource):
+    def get(self, entry_id=None):
+        if entry_id:
+            # Get specific entry
+            entry = UserBgIns.query.get_or_404(entry_id)
+            return {
+                'id': entry.id,
+                'account_id': entry.account_id,
+                'created_at': entry.created_at.isoformat(),
+                'updated_at': entry.updated_at.isoformat(),
+                'bg_morning': str(entry.bg_morning) if entry.bg_morning else None,
+                'bg_afternoon': str(entry.bg_afternoon) if entry.bg_afternoon else None,
+                'bg_evening': str(entry.bg_evening) if entry.bg_evening else None,
+                'ins_morning': str(entry.ins_morning) if entry.ins_morning else None,
+                'ins_afternoon': str(entry.ins_afternoon) if entry.ins_afternoon else None,
+                'ins_evening': str(entry.ins_evening) if entry.ins_evening else None
+            }
+        else:
+            # Get all entries with optional filtering by account_id
+            account_id = request.args.get('account_id', type=int)
+            query = UserBgIns.query
+            if account_id:
+                # Verify account exists
+                account = Account.query.get(account_id)
+                if not account:
+                    return {
+                        'message': f'Invalid account_id: {account_id}'
+                    }, 400
+                query = query.filter_by(account_id=account_id)
+            entries = query.order_by(UserBgIns.created_at.desc()).all()
+            return [{
+                'id': entry.id,
+                'account_id': entry.account_id,
+                'created_at': entry.created_at.isoformat(),
+                'updated_at': entry.updated_at.isoformat(),
+                'bg_morning': str(entry.bg_morning) if entry.bg_morning else None,
+                'bg_afternoon': str(entry.bg_afternoon) if entry.bg_afternoon else None,
+                'bg_evening': str(entry.bg_evening) if entry.bg_evening else None,
+                'ins_morning': str(entry.ins_morning) if entry.ins_morning else None,
+                'ins_afternoon': str(entry.ins_afternoon) if entry.ins_afternoon else None,
+                'ins_evening': str(entry.ins_evening) if entry.ins_evening else None
+            } for entry in entries]
+
+    def post(self):
+        data = request.get_json()
+        
+        # Validate required fields
+        if 'account_id' not in data:
+            return {'message': 'account_id is required'}, 400
+        
+        account = Account.query.get(data['account_id'])
+        if not account:
+             return {
+                'message': f'Invalid account_id: {data["account_id"]}'
+            }, 400
+
+        # Create new entry
+        new_entry = UserBgIns(
+            account_id=data['account_id'],
+            bg_morning=data.get('bg_morning'),
+            bg_afternoon=data.get('bg_afternoon'),
+            bg_evening=data.get('bg_evening'),
+            ins_morning=data.get('ins_morning'),
+            ins_afternoon=data.get('ins_afternoon'),
+            ins_evening=data.get('ins_evening')
+        )
+
+        try:
+            db.session.add(new_entry)
+            db.session.commit()
+            return {
+                'message': 'Entry created successfully',
+                'id': new_entry.id
+            }, 201
+        except Exception as e:
+            db.session.rollback()
+            return {'message': f'Error creating entry: {str(e)}'}, 500
+
+    def put(self, entry_id):
+        entry = UserBgIns.query.get_or_404(entry_id)
+        data = request.get_json()
+
+        if 'account_id' in data:
+            account = Account.query.get(data['account_id'])
+            if not account:
+                return {
+                    'message': f'Invalid account_id: {data["account_id"]}'
+                }, 400
+
+        # Update fields if provided
+        if 'bg_morning' in data:
+            entry.bg_morning = data['bg_morning']
+        if 'bg_afternoon' in data:
+            entry.bg_afternoon = data['bg_afternoon']
+        if 'bg_evening' in data:
+            entry.bg_evening = data['bg_evening']
+        if 'ins_morning' in data:
+            entry.ins_morning = data['ins_morning']
+        if 'ins_afternoon' in data:
+            entry.ins_afternoon = data['ins_afternoon']
+        if 'ins_evening' in data:
+            entry.ins_evening = data['ins_evening']
+
+        try:
+            db.session.commit()
+            return {'message': 'Entry updated successfully'}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message': f'Error updating entry: {str(e)}'}, 500
+
+    def delete(self, entry_id):
+        entry = UserBgIns.query.get_or_404(entry_id)
+        try:
+            db.session.delete(entry)
+            db.session.commit()
+            return {'message': 'Entry deleted successfully'}, 200
+        except Exception as e:
+            db.session.rollback()
+            return {'message': f'Error deleting entry: {str(e)}'}, 500
+
 class TestEnvironment(Resource):
     def get(self):
         # Return a safe subset of environment variables
@@ -159,6 +282,7 @@ class TestEnvironment(Resource):
 ###########################
 #    Add API Resources    #
 ###########################
+api.add_resource(UserBgInsResource, '/entries', '/entries/<int:entry_id>')
 api.add_resource(CreateUserAccount, '/createUserAccount')
 api.add_resource(ValidateUserLogin, '/validateUserLogin')
 api.add_resource(TestEnvironment, '/testEnv')
