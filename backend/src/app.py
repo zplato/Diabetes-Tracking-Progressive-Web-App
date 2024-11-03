@@ -5,8 +5,6 @@ from flask_restful import Api, Resource
 from flask_cors import CORS
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
-from decimal import Decimal
 import os
 
 # Local Imports
@@ -294,18 +292,18 @@ api.add_resource(TestEnvironment, '/testEnv')
 # Starts the Flask Application in Debug Mode
 # Run this file and open a browser to view, go to the following default http://Hostname:Port
 # Hostname:Port -  http://localhost:5000 || http://127.0.0.1:5000
-def main():
-    print("Made it here #2")
-    environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Connected to the MySQL DB
+# def main():
+print("Made it here #2")
+environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Connected to the MySQL DB
                                             # TEST = Local Development and Test, using in-memory SQL-Lite DB.
                                             # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
-    with app.app_context():
-        init_db(environment)
-        app.run(debug=True)
+with app.app_context():
+    init_db(environment)
+    app.run(debug=True)
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#    main()
 
-main() # Call to main from Render
+# main() # Call to main from Render
 
 
