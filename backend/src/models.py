@@ -13,6 +13,7 @@ class Account(db.Model):
     last_name = db.Column(db.String(50))
     mid_name = db.Column(db.String(50))
     dob = db.Column(db.Date)
+    hapi_fhir_response = db.Column(db.Text)
     # ranking = db.Column(db.Integer)
     # points = db.Column(db.Integer)
 
