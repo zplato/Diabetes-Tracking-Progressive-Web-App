@@ -310,6 +310,7 @@ if __name__ == '__main__':
 # Initialization for Render
 # Render doesn't utilize 'main()' function,it runs gunicorn app:app directly
 if not db_initialized:
-    init_db(environment)
+    with app.app_context():
+        init_db(environment)
 
 
