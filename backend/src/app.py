@@ -28,13 +28,16 @@ load_dotenv(dotenv_path)
 default_rank = "Bronze"
 default_num_points = 0
 
+print("Made it here #2")
 
 ###########################
 #      Database Init      #
 ###########################
 def init_db(env):
+    print("Made it here #3")
     if 'SQLALCHEMY_DATABASE_URI' not in app.config: # If we don't already have a db for this sessions context
         # Production 'MySQL' Database
+        print("Made it here #4")
         if env == 'PROD':
             SQLALCHEMY_DATABASE_URI = (
             f"mysql+mysqlconnector://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
@@ -292,6 +295,7 @@ api.add_resource(TestEnvironment, '/testEnv')
 # Run this file and open a browser to view, go to the following default http://Hostname:Port
 # Hostname:Port -  http://localhost:5000 || http://127.0.0.1:5000
 if __name__ == '__main__':
+    print("Made it here #1")
     environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Connected to the MySQL DB
                                             # TEST = Local Development and Test, using in-memory SQL-Lite DB.
                                             # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
