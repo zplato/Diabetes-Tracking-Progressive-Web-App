@@ -22,7 +22,7 @@ function App() {
   // Effect to navigate to the create account page if not logged in and on the root path
   useEffect(() => {
     if (!isLoggedIn && location.pathname === '/') {
-      navigate('/create-account');
+      navigate('/login');
     }
   }, [isLoggedIn, location, navigate]);
 
@@ -60,16 +60,16 @@ function App() {
 
   return (
     <Box>
-      <AppBar position="static">
+      <AppBar position="static" sx={{ backgroundColor: '#A02B93' }}>
         <Toolbar>
           {/* Title of the app in the AppBar */}
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            MAZNA Tech - Diabetes for Kids
+            MAZNA Tech - Diabetes App for Kids!
           </Typography>
           {/* Display the username when logged in */}
           {isLoggedIn && (
             <Typography variant="body2" color="inherit" sx={{ mr: 2 }}>
-              {username}
+              Hello, {username}!
             </Typography>
           )}
           {/* Show login and create account links if the user is not logged in */}
