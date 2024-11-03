@@ -46,4 +46,43 @@ The following Endpoints are configured along with a basic description of their f
 * **Test Environment**
   * URL: `/testEnv`
   * Description: This endpoint returns a safe subset of environment variables, which helps in confirming the environment configuration without exposing sensitive information like passwords.
+### Blood Glucose and Insulin Entries
+* **List All Entries** 
+  * URL: `/entries`
+  * Method: `GET`
+  * Query Parameters:
+    * `account_id` (optional): Filter entries by account ID URL: `/entries?account_id=<account_id>`
+  * Description: Retrieves all blood glucose and insulin entries
 
+* **Get Single Entry** 
+  * URL: `/entries/<entry_id>`
+  * Method: `GET`
+  * Description: Retrieves a specific entry by ID
+
+* **Create Entry** 
+  * URL: `/entries`
+  * Method: `POST`
+  * Description: Creates a new blood glucose/insulin entry
+  * Request Body:
+    ```json
+    {
+      "account_id": "integer",
+      "bg_morning": "decimal(optional)",
+      "bg_afternoon": "decimal(optional)",
+      "bg_evening": "decimal(optional)",
+      "ins_morning": "decimal(optional)",
+      "ins_afternoon": "decimal(optional)",
+      "ins_evening": "decimal(optional)"
+    }
+    ```
+
+* **Update Entry** 
+  * URL: `/entries/<entry_id>`
+  * Method: `PUT`
+  * Description: Updates an existing entry
+  * Request Body: Same as Create Entry (all fields optional)
+
+* **Delete Entry** 
+  * URL: `/entries/<entry_id>`
+  * Method: `DELETE`
+  * Description: Deletes an existing entry
