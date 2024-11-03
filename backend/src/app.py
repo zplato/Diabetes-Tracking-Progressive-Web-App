@@ -34,8 +34,9 @@ db_initialized = False
 #      Database Init      #
 ###########################
 def init_db(env):
-    print("Initializing DB")
     if 'SQLALCHEMY_DATABASE_URI' not in app.config: # If we don't already have a db for this sessions context
+        print("Initializing DB")
+
         # Production 'MySQL' Database
         if env == 'PROD':
             SQLALCHEMY_DATABASE_URI = (
