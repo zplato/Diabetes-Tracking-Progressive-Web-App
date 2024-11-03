@@ -21,10 +21,14 @@ api = Api(app)
 # Load environment variables from .env file
 dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
 load_dotenv(dotenv_path)
+environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Connected to the MySQL DB
+                                        # TEST = Local Development and Test, using in-memory SQL-Lite DB.
+                                        # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
 
 # Global Default Vars
 default_rank = "Bronze"
 default_num_points = 0
+db_initialized = False
 
 print("Made it here #1")
 
@@ -53,6 +57,8 @@ def init_db(env):
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    # Not using the Flask-SQLAlchemy's event system, set explicitly to false in order to get rid of warning
         db.init_app(app)                                        # Bind the app to the db instance
 
+    global db_initialized
+    db_initialized = True
     is_connected, message = check_connection(app)           # Verify the database connection
     print(message)                                          # Printing to the STDOUT is fine for now
 
@@ -292,18 +298,18 @@ api.add_resource(TestEnvironment, '/testEnv')
 # Starts the Flask Application in Debug Mode
 # Run this file and open a browser to view, go to the following default http://Hostname:Port
 # Hostname:Port -  http://localhost:5000 || http://127.0.0.1:5000
-# def main():
-print("Made it here #2")
-environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Connected to the MySQL DB
-                                            # TEST = Local Development and Test, using in-memory SQL-Lite DB.
-                                            # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
-with app.app_context():
+def main():
+    print("Made it here #2")
+    with app.app_context():
+        init_db(environment)
+        app.run(debug=True)
+
+if __name__ == '__main__':
+    main()
+
+# Initialization for Render
+# Render doesn't utilize 'main()' function,it runs gunicorn app:app directly
+if not db_initialized:
     init_db(environment)
-    app.run(debug=True)
-
-# if __name__ == '__main__':
-#    main()
-
-# main() # Call to main from Render
 
 
