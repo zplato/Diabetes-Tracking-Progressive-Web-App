@@ -40,7 +40,7 @@ def init_db(env):
         # Production 'MySQL' Database
         if env == 'PROD':
             SQLALCHEMY_DATABASE_URI = (
-            f"mysql+mysqlconnector://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
+            f"mysql+pymysql://{os.getenv('MYSQL_DATABASE_USER')}:{os.getenv('MYSQL_DATABASE_PASSWORD')}@"
             f"{os.getenv('MYSQL_DATABASE_HOST')}:3306/{os.getenv('MYSQL_DATABASE_DB')}")
         # Test - Dynamic 'in-memory sqlite' database
         elif env == 'TEST':
