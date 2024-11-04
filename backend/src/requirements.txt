@@ -6,3 +6,4 @@ Gunicorn
 mysql-connector-python
 python-dotenv
 werkzeug
+pymysql
