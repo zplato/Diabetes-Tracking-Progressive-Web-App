@@ -133,6 +133,7 @@ export function LoginPage({ onLogin }) {
                     handleCreateAccountClick(e);
                   }}
                   style={{ textDecoration: 'none' }}
+                  sx={{ color: '#A02B93' }}
                 >
                   Create Account
                 </Link>
@@ -141,7 +142,7 @@ export function LoginPage({ onLogin }) {
               <Button
                 type="submit"
                 variant="contained"
-                color="primary"
+                sx={{ backgroundColor: '#A02B93' }}                
               >
                 Sign In
               </Button>

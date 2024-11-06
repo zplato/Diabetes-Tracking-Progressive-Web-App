@@ -104,9 +104,10 @@ export function CreateAccount({ onLogin }) {
             {/* Buttons for canceling or submitting the form */}
             <Box display="flex" justifyContent="space-between">
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
                 onClick={handleCancel}
+                sx={{ backgroundColor: '#7F7F7F'}}                               
               >
                 Cancel
               </Button>
@@ -114,6 +115,7 @@ export function CreateAccount({ onLogin }) {
                 variant="contained"
                 color="primary"
                 onClick={handleSubmit}
+                sx={{ backgroundColor: '#A02B93' }}
               >
                 Submit
               </Button>
