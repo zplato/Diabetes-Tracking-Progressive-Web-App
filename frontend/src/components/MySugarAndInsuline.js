@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Modal, Card, CardContent } from '@mui/material';
 import { WbSunny, Cloud, Nightlight } from '@mui/icons-material';
+import axios from 'axios';
 
 export function MySugarAndInsulin() {
   // State variables to track inputs for each time of day and the entry date
@@ -36,7 +37,42 @@ export function MySugarAndInsulin() {
       eveningGlucose &&
       eveningInsulin
     ) {
-      setOpen(true); // Open the modal to confirm the entry has been saved
+      try {
+        // Define the API URL (use the appropriate environment endpoint)
+        const apiUrl = window.location.hostname === '127.0.0.1'
+          ? 'http://127.0.0.1:5000/entries'
+          : 'https://cs6440groupproj.onrender.com/entries';
+
+        // Get account_id from local storage or context (assuming the user is logged in)
+        const accountId = localStorage.getItem('account_id');
+
+        // Construct the payload
+        const payload = {
+          account_id: accountId,
+          entry_date: entryDate,
+          bg_morning: morningGlucose,
+          ins_morning: morningInsulin,
+          bg_afternoon: afternoonGlucose,
+          ins_afternoon: afternoonInsulin,
+          bg_evening: eveningGlucose,
+          ins_evening: eveningInsulin
+        };
+
+        // Make a POST request to the API
+        const response = await axios.post(apiUrl, payload, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}` // Use the auth token
+          }
+        });
+
+        // If the entry is successfully created, open the modal to confirm
+        if (response.status === 201) {
+          setOpen(true);
+        }
+      } catch (error) {
+        console.error('Error saving entry:', error);
+        // Handle error - show a message or do some error logging
+      }
     }
   };
 
