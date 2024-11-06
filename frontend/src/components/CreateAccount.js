@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Card, CardContent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export function CreateAccount({ onLogin }) {
   // State to store the input values for user information
@@ -10,6 +11,7 @@ export function CreateAccount({ onLogin }) {
   const [middleName, setMiddleName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [lastName, setLastName] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   // Function to handle the cancel button click, navigating back to the login page
@@ -18,11 +20,41 @@ export function CreateAccount({ onLogin }) {
   };
 
   // Function to handle the submit button click, creating an account
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Ensure all required fields are filled before submitting
     if (username && firstName && password && dateOfBirth && lastName) {
-      console.log('Account created'); // Mock message indicating account creation
-      onLogin(username); // Log the user in after account creation using the provided username
+      try {
+        // Determine API URL based on environment - Used for testing but should probably be the production link only
+        const apiUrl = window.location.hostname === '127.0.0.1'
+          ? 'http://127.0.0.1:5000/createUserAccount'
+          : 'https://cs6440groupproj.onrender.com/createUserAccount';
+
+        // Make a POST request to the Flask API to create a new user account
+        const response = await axios.post(apiUrl, {
+          username,
+          password,
+          firstname: firstName,
+          middlename: middleName,
+          lastname: lastName,
+          dob: dateOfBirth,
+        });
+
+        // If the account creation is successful, call the provided onLogin function with the username
+        if (response.status === 201) {
+          onLogin(username);
+        }
+      } catch (error) {
+        // Handle any errors during the account creation process
+        if (error.response && error.response.status === 409) {
+          setErrorMessage('Username already exists');
+        } else if (error.response && error.response.status === 400) {
+          setErrorMessage(error.response.data.message);
+        } else {
+          setErrorMessage('An error occurred. Please try again later.');
+        }
+      }
+    } else {
+      setErrorMessage('Please fill in all required fields');
     }
   };
 
@@ -101,6 +133,12 @@ export function CreateAccount({ onLogin }) {
                 required
               />
             </Box>
+            {/* Display error message if account creation fails */}
+            {errorMessage && (
+              <Typography variant="body2" color="error" mt={2}>
+                {errorMessage}
+              </Typography>
+            )}
             {/* Buttons for canceling or submitting the form */}
             <Box display="flex" justifyContent="space-between">
               <Button
