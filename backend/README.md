@@ -32,6 +32,10 @@ Apply your database credentials using your preferred SQL client. If you get the 
 
 **Local Development** - Utilize your own .env file under `/backend` path. There is an included a sample `example.env` [file](./example.env), so you can duplicate it to create your `.env` file. 
 
+**Test Ephemeral Database** - For testing, an in-memory sqlite database is used. In order to invoke this configuration locally when running the app, an environment variable `ENVIRONMENT` must be set equal to `TEST` in the backend `.env` file. When you run the app, the init_db function will initialize the in-memory sqlite database. 
+
+**Production Database** - For access to the production MySql database, then the environment variable `ENVIRONMENT` must be set equal to `PROD` in the backend `.env` file. When you run the app, the init_db function will initialize the connection to the production MySql database. 
+
 ## Application Program Interface (API)
 The following Endpoints are configured along with a basic description of their functionality:
 
@@ -43,6 +47,10 @@ The following Endpoints are configured along with a basic description of their f
   * URL: `/validateUserLogin`
   * Method: `POST`
   * Description: This endpoint validates user login credentials. It checks if the provided username and password match any entry in the database.
+* **Create User Account**
+  * URL: `/createUserAccount`
+  * Method: `POST`
+  * Description: This endpoint creates a user account provided a given username, firstname, middlename, lastname and date of birth. You may optionally provide a middle name. The password is hashed and the user, along with all their associated information is stored as an entry in the accounts table. 
 * **Test Environment**
   * URL: `/testEnv`
   * Description: This endpoint returns a safe subset of environment variables, which helps in confirming the environment configuration without exposing sensitive information like passwords.
