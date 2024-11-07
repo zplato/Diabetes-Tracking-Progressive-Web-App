@@ -24,10 +24,8 @@ export function CreateAccount({ onLogin }) {
     // Ensure all required fields are filled before submitting
     if (username && firstName && password && dateOfBirth && lastName) {
       try {
-        // Determine API URL based on environment - Used for testing but should probably be the production link only
-        const apiUrl = window.location.hostname === '127.0.0.1'
-          ? 'http://127.0.0.1:5000/createUserAccount'
-          : 'https://cs6440groupproj.onrender.com/createUserAccount';
+        // Backend API
+        const apiUrl = 'https://cs6440groupproj.onrender.com/createUserAccount';
 
         // Make a POST request to the Flask API to create a new user account
         const response = await axios.post(apiUrl, {

@@ -21,9 +21,7 @@ export function LoginPage({ onLogin }) {
     if (username && password) {
       try {
         // Determine API URL based on environment - Used for testing but should probably be the production link only
-        const apiUrl = window.location.hostname === '127.0.0.1'
-          ? 'http://127.0.0.1:5000/validateUserLogin'
-          : 'https://cs6440groupproj.onrender.com/validateUserLogin';
+        const apiUrl = 'https://cs6440groupproj.onrender.com/validateUserLogin';
 
         // Make a POST request to the Flask API to validate the login
         const response = await axios.post(apiUrl, {
