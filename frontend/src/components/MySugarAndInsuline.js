@@ -26,7 +26,7 @@ export function MySugarAndInsulin() {
   };
 
   // Function to handle the submission of the form
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Check if all required fields are filled before proceeding
     if (
       entryDate &&
@@ -39,9 +39,7 @@ export function MySugarAndInsulin() {
     ) {
       try {
         // Define the API URL (use the appropriate environment endpoint)
-        const apiUrl = window.location.hostname === '127.0.0.1'
-          ? 'http://127.0.0.1:5000/entries'
-          : 'https://cs6440groupproj.onrender.com/entries';
+        const apiUrl = 'https://cs6440groupproj.onrender.com/entries';
 
         // Get account_id from local storage or context (assuming the user is logged in)
         const accountId = localStorage.getItem('account_id');
