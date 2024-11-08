@@ -29,13 +29,17 @@ export function CreateAccount({ onLogin }) {
 
         // Make a POST request to the Flask API to create a new user account
         const response = await axios.post(apiUrl, {
-          username,
-          password,
+          username: username,
+          password: password,
           firstname: firstName,
           middlename: middleName,
           lastname: lastName,
           dob: dateOfBirth,
-        });
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+      });
 
         // If the account creation is successful, call the provided onLogin function with the username
         if (response.status === 201) {
