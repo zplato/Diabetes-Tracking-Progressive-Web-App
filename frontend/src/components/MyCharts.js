@@ -156,9 +156,9 @@ export function MyCharts() {
   return (
     <Box p={3} display="flex" flexDirection="column" alignItems="center">
       {/* Dropdown and button to select and display the appropriate chart */}
-      <Box display="flex" alignItems="center" mb={3} justifyContent="center">
-        <Typography variant="h6" mr={2}>
-          Show Chart by
+      <Box display="flex" alignItems="center" mb={2} mt={1} justifyContent="center" gap={1}>
+        <Typography mr={2} sx={{ fontSize: '20px', letterSpacing: '0.7px'}}>
+          Show Chart By
         </Typography>
         <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
           <InputLabel>Chart Type</InputLabel>
@@ -173,7 +173,7 @@ export function MyCharts() {
             <MenuItem value="insulin-dosages">Insulin Dosages</MenuItem>
           </Select>
         </FormControl>
-        <Button variant="contained" color="primary" onClick={handleGoClick}>
+        <Button variant="contained" color="primary" onClick={handleGoClick} sx={{ fontSize: '17px', backgroundColor: '#A02B93', width: '80px', height: '50px' }}>
           Go
         </Button>
       </Box>

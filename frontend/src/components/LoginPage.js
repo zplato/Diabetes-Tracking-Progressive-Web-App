@@ -70,16 +70,32 @@ export function LoginPage({ onLogin }) {
       justifyContent="center"
       alignItems="flex-start"
       minHeight="100vh"
-      pt={3}
-      bgcolor="#f0f0f0"
+      pt={10}
+      gap={15}
+      bgcolor="#F7F7F7"
     >
+      {/* Kid 1 with trophy */}
+      <Box component="img" src="/images/kid-book.png" alt="kid image" sx={{ width: '340px' }} />
+
       <Card sx={{ width: 400, boxShadow: 3 }}>
         <CardContent>
           {/* Title for the login form */}
-          <Typography variant="h4" mb={3} textAlign="center">
-            Login
-          </Typography>
-          <Box component="form" onSubmit={handleFormSubmit}>
+          <Box display="flex" alignItems="center"  justifyContent="center" gap={1}>
+            <Typography mt={2} textAlign="center" sx={{ fontSize: '32px', letterSpacing: '0.7px', color: '#A02B93' }}>
+              MAZNA
+            </Typography>
+            <Typography mt={2} textAlign="center" sx={{ fontSize: '32px', letterSpacing: '0.7px', color: 'black' }}>
+              Tech
+            </Typography>
+          </Box>
+
+          <Box display="flex" alignItems="center"  justifyContent="center" gap={1}>
+            <Typography mb={1} textAlign="center" sx={{ fontSize: '16px', letterSpacing: '0.7px', color: '#333333' }}>
+              Diabetes App for Kids!
+            </Typography>            
+          </Box>
+          
+          <Box component="form" onSubmit={handleFormSubmit} pl={2} pr={2}>
             {/* Input field for the username */}
             <TextField
               label="Username"
@@ -119,7 +135,7 @@ export function LoginPage({ onLogin }) {
                 {errorMessage}
               </Typography>
             )}
-            <Box mt={2} display="flex" justifyContent="space-between" alignItems="center">
+            <Box mt={3} mb={1} display="flex" justifyContent="space-between" alignItems="center">
               <Box textAlign="left">
                 {/* Link to navigate to the create account page if user doesn't have an account */}
                 <Typography variant="body2">No Account Yet?</Typography>
@@ -139,8 +155,8 @@ export function LoginPage({ onLogin }) {
               {/* Button to initiate the login process */}
               <Button
                 type="submit"
-                variant="contained"
-                sx={{ backgroundColor: '#A02B93' }}                
+                variant="contained"                               
+                sx={{ fontSize: '16px', backgroundColor: '#A02B93', width: '100px', height: '45px' }}               
               >
                 Sign In
               </Button>

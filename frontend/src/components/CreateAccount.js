@@ -66,18 +66,23 @@ export function CreateAccount({ onLogin }) {
       justifyContent="center"
       alignItems="flex-start"
       minHeight="100vh"
-      pt={3}
-      bgcolor="#f0f0f0"
+      pt={7}
+      bgcolor="#F7F7F7"
     >
       <Card sx={{ width: 500, boxShadow: 3 }}>
         <CardContent>
           {/* Title for the create account form */}
-          <Typography variant="h4" mb={3} textAlign="center">
-            Create Account
-          </Typography>
+          <Box display="flex" alignItems="center"  justifyContent="center" gap={1}>
+            <Typography mt={1} mb={3} textAlign="center" sx={{ fontSize: '32px', letterSpacing: '0.7px', color: '#A02B93' }}>
+              Create
+            </Typography>
+            <Typography mt={1} mb={3} textAlign="center" sx={{ fontSize: '32px', letterSpacing: '0.7px', color: 'black' }}>
+              Account
+            </Typography>
+          </Box>
           <Box component="form">
             {/* Input fields for username and first name */}
-            <Box display="flex" gap={2} mb={2}>
+            <Box display="flex" gap={4} mb={3} pl={2} pr={2}>
               <TextField
                 label="Username"
                 variant="outlined"
@@ -96,7 +101,7 @@ export function CreateAccount({ onLogin }) {
               />
             </Box>
             {/* Input fields for password and middle name */}
-            <Box display="flex" gap={2} mb={2}>
+            <Box display="flex" gap={4} mb={3} pl={2} pr={2}>
               <TextField
                 label="Password"
                 type="password"
@@ -115,7 +120,7 @@ export function CreateAccount({ onLogin }) {
               />
             </Box>
             {/* Input fields for date of birth and last name */}
-            <Box display="flex" gap={2} mb={2}>
+            <Box display="flex" gap={4} mb={3} pl={2} pr={2}>
               <TextField
                 label="Date of Birth"
                 type="date"
@@ -142,12 +147,12 @@ export function CreateAccount({ onLogin }) {
               </Typography>
             )}
             {/* Buttons for canceling or submitting the form */}
-            <Box display="flex" justifyContent="space-between">
+            <Box display="flex" justifyContent="space-between" mb={1} mt={4} gap={4} pl={2} pr={2}>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleCancel}
-                sx={{ backgroundColor: '#7F7F7F'}}                               
+                onClick={handleCancel}                
+                sx={{ fontSize: '16px', backgroundColor: '#7F7F7F', width: '130px', height: '45px' }}                               
               >
                 Cancel
               </Button>
@@ -155,7 +160,7 @@ export function CreateAccount({ onLogin }) {
                 variant="contained"
                 color="primary"
                 onClick={handleSubmit}
-                sx={{ backgroundColor: '#A02B93' }}
+                sx={{ fontSize: '16px', backgroundColor: '#A02B93', width: '130px', height: '45px' }}
               >
                 Submit
               </Button>

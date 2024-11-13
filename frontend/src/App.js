@@ -7,6 +7,7 @@ import { MyCharts } from './components/MyCharts';
 import { MyAchievements } from './components/MyAchievements';
 import { CreateAccount } from './components/CreateAccount';
 import { LoginPage } from './components/LoginPage';
+import { Height } from '@mui/icons-material';
 
 function App() {
   // State to track the selected tab index for navigation
@@ -61,13 +62,16 @@ function App() {
     <Box>
       <AppBar position="static" sx={{ backgroundColor: '#A02B93' }}>
         <Toolbar>
+          {/* MAZNA Logo */}
+          <img src="/images/mazna-logo.png" alt="mazna-logo" style={{ width: '30px', height: 'auto', marginRight: '16px'}} />
+          
           {/* Title of the app in the AppBar */}
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          <Typography sx={{ flexGrow: 1, fontSize: '19px', letterSpacing: '0.7px' }}>
             MAZNA Tech - Diabetes App for Kids!
           </Typography>
           {/* Display the username when logged in */}
           {isLoggedIn && (
-            <Typography variant="body2" color="inherit" sx={{ mr: 2 }}>
+            <Typography sx={{ fontSize: '16px', letterSpacing: '0.7px', mr: 3}}>
               Hello, {username}!
             </Typography>
           )}
@@ -75,19 +79,18 @@ function App() {
           {!isLoggedIn && (
             <Box>
               <Link
-                component="button"
-                variant="body2"
+                component="button"                
                 color="inherit"
                 onClick={() => navigate('/login')}
-                sx={{ mr: 2 }}
+                sx={{ fontSize: '16px', letterSpacing: '0.7px', mr: 5, textDecoration: 'none' }}
               >
                 Login
               </Link>
               <Link
-                component="button"
-                variant="body2"
+                component="button"                
                 color="inherit"
                 onClick={() => navigate('/create-account')}
+                sx={{ fontSize: '16px', letterSpacing: '0.7px', mr: 3, textDecoration: 'none' }}
               >
                 Create Account
               </Link>
@@ -96,10 +99,10 @@ function App() {
           {/* Show logout link if the user is logged in */}
           {isLoggedIn && (
             <Link
-              component="button"
-              variant="body2"
+              component="button"              
               color="inherit"
               onClick={handleLogout}
+              sx={{ fontSize: '16px', letterSpacing: '0.7px', mr: 3, textDecoration: 'none' }}
             >
               Logout
             </Link>
@@ -111,10 +114,14 @@ function App() {
       {isLoggedIn ? (
         <Box>
           {/* Tabs for navigating between different pages */}
-          <Tabs value={selectedTab} onChange={handleTabChange} centered>
-            <Tab label="My Sugar & Insulin" />
-            <Tab label="My Charts" />
-            <Tab label="My Achievements" />
+          <Tabs value={selectedTab} onChange={handleTabChange} centered 
+              sx={{backgroundColor: '#F2F2F2','.MuiTabs-indicator': { backgroundColor: '#A02B93' }}}>
+            <Tab label="My Sugar & Insulin" 
+                sx={{ color: selectedTab === 0 ? '#9CCF53' : '#999999', fontWeight: 600, '&.Mui-selected': { color: '#9CCF53' }}}/>
+            <Tab label="My Charts"
+                sx={{ color: selectedTab === 1 ? '#9CCF53' : '#999999', fontWeight: 600, '&.Mui-selected': { color: '#9CCF53' }}}/>
+            <Tab label="My Achievements" 
+                sx={{ color: selectedTab === 2 ? '#9CCF53' : '#999999', fontWeight: 600, '&.Mui-selected': { color: '#9CCF53' }}}/>
           </Tabs>
 
           {/* Define the routes for logged-in pages */}
