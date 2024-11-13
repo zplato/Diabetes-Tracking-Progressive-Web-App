@@ -78,12 +78,14 @@ export function MySugarAndInsulin() {
   const handleClose = () => setOpen(false);
 
   return (
-    <Box p={3}>
-      <Box display="flex" flexDirection="column" alignItems="center" mt={4}>
+    <Box p={3} display="flex" justifyContent="center" alignItems="center" gap={10}>
+      {/* Doctor image */}
+      <Box component="img" src="/images/doctor.jpg" alt="doctor-image" sx={{ width: '170px' }} />      
+      <Box display="flex" flexDirection="column" alignItems="center" mt={1}>      
         {/* Date input for entry date */}
-        <Box display="flex" flexDirection="column" alignItems="flex-start" mb={3}>
-          <TextField
-            label="Entry Date"
+        <Box display="flex" alignItems="center" mb={4} gap={3}>
+          <Typography sx={{ fontSize: '20px', letterSpacing: '0.7px'}}>Entry Date</Typography>        
+          <TextField            
             type="date"
             variant="outlined"
             value={entryDate}
@@ -96,34 +98,46 @@ export function MySugarAndInsulin() {
 
         {/* Grid layout for glucose and insulin inputs by time of day */}
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={3} mb={3}>
-          <Typography variant="h6">Time of Day</Typography>
-          <Typography variant="h6">Blood Glucose</Typography>
-          <Typography variant="h6">Insulin Dosage</Typography>
+          <Box display="flex" alignItems="center" justifyContent="center" sx={{ bgcolor: '#EDFFE0', height: '50px', borderRadius: '5px' }}>
+            <Typography sx={{ fontSize: '19px', letterSpacing: '0.7px', color: '#333333'}}>Time of Day</Typography>
+          </Box>
+
+          <Box display="flex" alignItems="center" justifyContent="center" sx={{ bgcolor: '#EDFFE0', height: '50px', borderRadius: '5px' }}>
+            <Typography sx={{ fontSize: '19px', letterSpacing: '0.7px', color: '#333333' }}>Blood Glucose</Typography>
+          </Box>
+
+          <Box display="flex" alignItems="center"  justifyContent="center" sx={{ bgcolor: '#EDFFE0', height: '50px', borderRadius: '5px' }}>
+            <Typography sx={{ fontSize: '19px', letterSpacing: '0.7px', color: '#333333' }}>Insulin Dosage</Typography>
+          </Box>    
 
           {/* Morning readings inputs */}
           <Box display="flex" alignItems="center">
-            <WbSunny sx={{ mr: 1 }} /> Morning
+            <WbSunny sx={{ mr: 1 , color: 'orange', pl: 3}} /> 
+            <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Morning</Typography>
           </Box>
           <TextField
+            label="mg/dl"
             type="number"
             variant="outlined"
             value={morningGlucose}
             onChange={(e) => setMorningGlucose(e.target.value)}
             required
-          />
+          />                              
           <TextField
+            label="units"
             type="number"
             variant="outlined"
             value={morningInsulin}
             onChange={(e) => setMorningInsulin(e.target.value)}
             required
-          />
-
+          />          
           {/* Afternoon readings inputs */}
           <Box display="flex" alignItems="center">
-            <Cloud sx={{ mr: 1 }} /> Afternoon
+            <Cloud sx={{ mr: 1 , color: '#90CFFC', pl: 3}} /> 
+            <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Afternoon</Typography>
           </Box>
           <TextField
+            label="mg/dl"
             type="number"
             variant="outlined"
             value={afternoonGlucose}
@@ -131,18 +145,20 @@ export function MySugarAndInsulin() {
             required
           />
           <TextField
+            label="units"
             type="number"
             variant="outlined"
             value={afternoonInsulin}
             onChange={(e) => setAfternoonInsulin(e.target.value)}
             required
-          />
-
+          />          
           {/* Evening readings inputs */}
           <Box display="flex" alignItems="center">
-            <Nightlight sx={{ mr: 1 }} /> Evening
+            <Nightlight sx={{ mr: 1 , color: '#8B79B5', pl: 3}} /> 
+            <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Evening</Typography>
           </Box>
           <TextField
+            label="mg/dl"
             type="number"
             variant="outlined"
             value={eveningGlucose}
@@ -150,6 +166,7 @@ export function MySugarAndInsulin() {
             required
           />
           <TextField
+            label="units"
             type="number"
             variant="outlined"
             value={eveningInsulin}
@@ -159,11 +176,11 @@ export function MySugarAndInsulin() {
         </Box>
 
         {/* Buttons to clear inputs or submit the form */}
-        <Box mt={2}>
-          <Button variant="outlined" color="primary" onClick={handleClear} sx={{ mr: 2 }}>
+        <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={5} mt={2}>          
+          <Button variant="contained" color="primary" onClick={handleClear} sx={{ fontSize: '17px', backgroundColor: '#7F7F7F', width: '150px', height: '50px' }}>
             Clear
           </Button>
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
+          <Button variant="contained" color="primary" onClick={handleSubmit} sx={{ fontSize: '17px', backgroundColor: '#A02B93', width: '150px', height: '50px' }}>
             Submit
           </Button>
         </Box>
