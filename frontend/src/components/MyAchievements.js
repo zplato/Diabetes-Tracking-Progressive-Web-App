@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Card, CardContent } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
 
-export function MyAchievements({ username }) {
+export function MyAchievements({ accountID, username, firstName }) {
   // Placeholder values for rank and points
   const rank = "Silver";
   const currentPoints = 1200;
@@ -14,9 +14,9 @@ export function MyAchievements({ username }) {
       <Box component="img" src="/images/kid-trophy-1.jpg" alt="doctor-image" sx={{ width: '170px' }} />
       
       <Box display="flex" alignItems="center" flexDirection="column" width="100%" maxWidth={600}>
-        {/* Greeting message with the username */}
+        {/* Greeting message with the first name */}
         <Typography mt={1} mb={2} sx={{ fontSize: '24px', letterSpacing: '0.7px', color: 'black' }}>
-          Hey, {username}!
+          Hey, {firstName}!
         </Typography>
         <Typography mb={4} sx={{ fontSize: '24px', letterSpacing: '0.7px', color: 'black' }}>
           Good job! Keep it up!
