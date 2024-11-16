@@ -19,27 +19,35 @@ export function LoginPage({ onLogin }) {
   const handleLoginClick = async () => {
     // Basic check to ensure both username and password are provided
     if (username && password) {
-      try {
-        // Determine API URL based on environment - Used for testing but should probably be the production link only
-        const apiUrl = 'https://cs6440groupproj.onrender.com/validateUserLogin';
+      // Check if the host is localhost or 127.0.0.1
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      
+      if (isLocalhost) {
+        // Directly set the user as logged in when testing on localhost because CORS seems to block access
+        onLogin(username);
+      } else {
+        try {
+          // Determine API URL based on environment - Used for testing but should probably be the production link only
+          const apiUrl = 'https://cs6440groupproj.onrender.com/validateUserLogin';
 
-        // Make a POST request to the Flask API to validate the login
-        const response = await axios.post(apiUrl, {
-          username,
-          password,
-        });
+          // Make a POST request to the Flask API to validate the login
+          const response = await axios.post(apiUrl, {
+            username,
+            password,
+          });
 
-        // If the login is successful, call the provided onLogin function with the username
-        if (response.status === 200) {
-          const userData = response.data;
-          onLogin(userData.username);
-        }
-      } catch (error) {
-        // Handle any errors during the login process
-        if (error.response && error.response.status === 401) {
-          setErrorMessage('Invalid username or password');
-        } else {
-          setErrorMessage('An error occurred. Please try again later.');
+          // If the login is successful, call the provided onLogin function with the username
+          if (response.status === 200) {
+            const userData = response.data;
+            onLogin(userData.username);
+          }
+        } catch (error) {
+          // Handle any errors during the login process
+          if (error.response && error.response.status === 401) {
+            setErrorMessage('Invalid username or password');
+          } else {
+            setErrorMessage('An error occurred. Please try again later.');
+          }
         }
       }
     } else {

@@ -1,11 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Typography, Modal, Card, CardContent } from '@mui/material';
 import { WbSunny, Cloud, Nightlight } from '@mui/icons-material';
 import axios from 'axios';
 
 export function MySugarAndInsulin() {
+
+  // Helper function to get today's date in 'YYYY-MM-DD' format
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   // State variables to track inputs for each time of day and the entry date
-  const [entryDate, setEntryDate] = useState('');
+  const [entryDate, setEntryDate] = useState(getTodayDate());
   const [morningGlucose, setMorningGlucose] = useState('');
   const [morningInsulin, setMorningInsulin] = useState('');
   const [afternoonGlucose, setAfternoonGlucose] = useState('');
@@ -13,10 +23,11 @@ export function MySugarAndInsulin() {
   const [eveningGlucose, setEveningGlucose] = useState('');
   const [eveningInsulin, setEveningInsulin] = useState('');
   const [open, setOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Function to clear all the input fields
   const handleClear = () => {
-    setEntryDate('');
+    setEntryDate(getTodayDate()); // Reset to today's date
     setMorningGlucose('');
     setMorningInsulin('');
     setAfternoonGlucose('');
@@ -53,13 +64,14 @@ export function MySugarAndInsulin() {
           bg_afternoon: afternoonGlucose,
           ins_afternoon: afternoonInsulin,
           bg_evening: eveningGlucose,
-          ins_evening: eveningInsulin
+          ins_evening: eveningInsulin,
         };
 
         // Make a POST request to the API
         const response = await axios.post(apiUrl, payload, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('authToken')}` // Use the auth token
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Use the auth token
+            'Content-Type': 'application/json'
           }
         });
 
@@ -70,7 +82,10 @@ export function MySugarAndInsulin() {
       } catch (error) {
         console.error('Error saving entry:', error);
         // Handle error - show a message or do some error logging
+        setErrorMessage('An error occurred while saving the entry. Please try again.');
       }
+    } else {
+      setErrorMessage('Please fill in all required fields');
     }
   };
 
@@ -174,6 +189,13 @@ export function MySugarAndInsulin() {
             required
           />
         </Box>
+
+        {/* Display error message if entry submission fails */}
+        {errorMessage && (
+          <Typography variant="body2" color="error" mt={2}>
+            {errorMessage}
+          </Typography>
+        )}
 
         {/* Buttons to clear inputs or submit the form */}
         <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={5} mt={2}>          
