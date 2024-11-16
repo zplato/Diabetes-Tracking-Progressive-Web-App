@@ -16,6 +16,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   // State to store the username of the logged-in user
   const [username, setUsername] = React.useState('');
+  const [firstName, setFirstName] = React.useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -45,9 +46,10 @@ function App() {
   };
 
   // Function to handle login, setting the user as logged in and storing the username
-  const handleLogin = (user) => {
+  const handleLogin = (user, firstName) => {
     setIsLoggedIn(true);
     setUsername(user);
+    setFirstName(firstName);
     navigate('/my-sugar-insulin');
   };
 
@@ -55,6 +57,7 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername('');
+    setFirstName('');
     navigate('/login');
   };
 
@@ -72,7 +75,7 @@ function App() {
           {/* Display the username when logged in */}
           {isLoggedIn && (
             <Typography sx={{ fontSize: '16px', letterSpacing: '0.7px', mr: 3}}>
-              Hello, {username}!
+              Hello, {firstName}!
             </Typography>
           )}
           {/* Show login and create account links if the user is not logged in */}
@@ -128,15 +131,15 @@ function App() {
           <Routes>
             <Route path="/my-sugar-insulin" element={<MySugarAndInsulin />} />
             <Route path="/my-charts" element={<MyCharts />} />
-            <Route path="/my-achievements" element={<MyAchievements />} />
+            <Route path="/my-achievements" element={<MyAchievements firstName={firstName}/>} />
           </Routes>
         </Box>
       ) : (
         <Routes>
           {/* Define the routes for non-logged-in pages */}
-          <Route path="/" element={<CreateAccount onLogin={(user) => handleLogin(user)} />} />
-          <Route path="/create-account" element={<CreateAccount onLogin={(user) => handleLogin(user)} />} />
-          <Route path="/login" element={<LoginPage onLogin={(user) => handleLogin(user)} />} />
+          <Route path="/" element={<CreateAccount onLogin={(user, firstName) => handleLogin(user, firstName)} />} />
+          <Route path="/create-account" element={<CreateAccount onLogin={(user, firstName) => handleLogin(user, firstName)} />} />
+          <Route path="/login" element={<LoginPage onLogin={(user, firstName) => handleLogin(user, firstName)} />} />
         </Routes>
       )}
     </Box>

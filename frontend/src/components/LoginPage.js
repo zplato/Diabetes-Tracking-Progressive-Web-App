@@ -32,7 +32,7 @@ export function LoginPage({ onLogin }) {
         // If the login is successful, call the provided onLogin function with the username
         if (response.status === 200) {
           const userData = response.data;
-          onLogin(userData.username);
+          onLogin(userData.username, userData.first_name);
         }
       } catch (error) {
         // Handle any errors during the login process
