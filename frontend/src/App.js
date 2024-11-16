@@ -7,7 +7,6 @@ import { MyCharts } from './components/MyCharts';
 import { MyAchievements } from './components/MyAchievements';
 import { CreateAccount } from './components/CreateAccount';
 import { LoginPage } from './components/LoginPage';
-import { Height } from '@mui/icons-material';
 
 function App() {
   // State to track the selected tab index for navigation
@@ -128,7 +127,7 @@ function App() {
           <Routes>
             <Route path="/my-sugar-insulin" element={<MySugarAndInsulin />} />
             <Route path="/my-charts" element={<MyCharts />} />
-            <Route path="/my-achievements" element={<MyAchievements />} />
+            <Route path="/my-achievements" element={<MyAchievements username={username} />} />
           </Routes>
         </Box>
       ) : (

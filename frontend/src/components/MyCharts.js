@@ -1,22 +1,52 @@
-import React, { useState } from 'react';
-import { Box, Button, Typography, Card, CardContent, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Card, CardContent, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea, PieChart, Pie, Cell } from 'recharts';
+import axios from 'axios';
 
 export function MyCharts() {
   // State to store the currently selected chart type from the dropdown
-  const [selectedChart, setSelectedChart] = useState('');
-  // State to determine whether to show the selected chart or not
-  const [showChart, setShowChart] = useState(false);
+  const [selectedChart, setSelectedChart] = useState('blood-glucose');
+  // State to store fetched chart data
+  const [chartData, setChartData] = useState([]);
+  // State to handle data fetching error
+  const [hasError, setHasError] = useState(false);
+
+  // Placeholder data for when user data is unavailable
+  const data = [
+    { created_at: "2009-01-07 00:00:00", bg_morning: 238.00, bg_afternoon: 261.00, bg_evening: 127.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
+    { created_at: "2009-01-08 00:00:00", bg_morning: 258.00, bg_afternoon: 189.00, bg_evening: 262.00, ins_morning: 100.00, ins_afternoon: 500.00, ins_evening: 100.00 },
+    { created_at: "2009-01-09 00:00:00", bg_morning: 168.00, bg_afternoon: 218.00, bg_evening: 103.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
+    { created_at: "2009-01-10 00:00:00", bg_morning: 88.00,  bg_afternoon: 179.00, bg_evening: 174.00, ins_morning: 500.00, ins_afternoon: 500.00, ins_evening: 100.00 },
+    { created_at: "2009-01-11 00:00:00", bg_morning: 261.00, bg_afternoon: 127.00, bg_evening: 258.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
+  ];
 
   // Function to handle dropdown selection change
   const handleChartChange = (event) => {
     setSelectedChart(event.target.value);
   };
 
-  // Function to handle the 'Go' button click to display the selected chart
-  const handleGoClick = () => {
-    setShowChart(true);
+  // Function to fetch chart data from the API
+  const fetchChartData = async () => {
+    try {
+      const accountId = localStorage.getItem('account_id');
+      const response = await axios.get(`https://cs6440groupproj.onrender.com/entries?account_id=${accountId}`);
+      if (response.status === 200) {
+        setChartData(response.data);
+        setHasError(false);
+      } else {
+        setChartData(data);
+        setHasError(true);
+      }
+    } catch (error) {
+      console.error('Error fetching chart data:', error);
+      setChartData(data);
+      setHasError(true);
+    }
   };
+
+  useEffect(() => {
+    fetchChartData();
+  }, [selectedChart]);
 
   // Color constants
   const MORNING = "#811e73";
@@ -82,6 +112,20 @@ export function MyCharts() {
     return new_data;
   };
 
+  function cleanData_id(data_in) {
+    let new_data = [];
+    for (let i in data_in) {
+      let pretty_date = data_in[i]["created_at"].split(" ")[0];
+      pretty_date = new Date(pretty_date.replace(/-/g, '/'));
+      pretty_date = pretty_date.toDateString();
+      
+      new_data.push( { created_at: pretty_date, reading: data_in[i]["ins_morning"] });
+      new_data.push( { created_at: pretty_date, reading: data_in[i]["ins_afternoon"] });
+      new_data.push( { created_at: pretty_date, reading: data_in[i]["ins_evening"] });
+    }
+    return new_data;
+  };
+
   function cleanData_bgBreakdown(data_in) {
     let new_data = cleanData_bg(data_in);
     let fin_data = [];
@@ -142,20 +186,11 @@ export function MyCharts() {
       );
     }
   };
-
-  // Placeholder data for the Blood Glucose readings over time
-  const data = [
-    { created_at: "2009-01-07 00:00:00", bg_morning: 238.00, bg_afternoon: 261.00, bg_evening: 127.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
-    { created_at: "2009-01-08 00:00:00", bg_morning: 258.00, bg_afternoon: 189.00, bg_evening: 262.00, ins_morning: 100.00, ins_afternoon: 500.00, ins_evening: 100.00 },
-    { created_at: "2009-01-09 00:00:00", bg_morning: 168.00, bg_afternoon: 218.00, bg_evening: 103.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
-    { created_at: "2009-01-10 00:00:00", bg_morning: 88.00,  bg_afternoon: 179.00, bg_evening: 174.00, ins_morning: 500.00, ins_afternoon: 500.00, ins_evening: 100.00 },
-    { created_at: "2009-01-11 00:00:00", bg_morning: 261.00, bg_afternoon: 127.00, bg_evening: 258.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
-    // Additional dummy data for the month
-  ];
+  
 
   return (
     <Box p={3} display="flex" flexDirection="column" alignItems="center">
-      {/* Dropdown and button to select and display the appropriate chart */}
+      {/* Dropdown to select and display the appropriate chart */}
       <Box display="flex" alignItems="center" mb={2} mt={1} justifyContent="center" gap={1}>
         <Typography mr={2} sx={{ fontSize: '20px', letterSpacing: '0.7px'}}>
           Show Chart By
@@ -173,76 +208,102 @@ export function MyCharts() {
             <MenuItem value="insulin-dosages">Insulin Dosages</MenuItem>
           </Select>
         </FormControl>
-        <Button variant="contained" color="primary" onClick={handleGoClick} sx={{ fontSize: '17px', backgroundColor: '#A02B93', width: '80px', height: '50px' }}>
-          Go
-        </Button>
       </Box>
 
-      {/* Display the Blood Glucose line chart if selected */}
-      {showChart && selectedChart === 'blood-glucose' && (
-        <ResponsiveContainer width="80%" height={500}>
-          <LineChart data={cleanData_bg(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="created_at" axisLine="false"/>
-            <YAxis label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
-            <Tooltip content={<BG_Tooltip />}/>
-            <Legend />
-            {/* Line for morning blood glucose values */}
-            <Line type="monotone" dataKey="reading" stroke="#811e73" />
-            <ReferenceArea y1={0} y2={50} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={50} y2={70} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={108} y2={180} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={280} y2={315} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-          </LineChart>
-        </ResponsiveContainer>
-      )}
-      {showChart && selectedChart === 'blood-glucose-split' && (
-        <ResponsiveContainer width="80%" height={500}>
-          <LineChart data={cleanData_bgSplit(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="created_at" axisLine="false"/>
-            <YAxis label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
-            <Tooltip content={<BGSplit_Tooltip />}/>
-            <Legend />
-            {/* Line for morning blood glucose values */}
-            <Line type="monotone" dataKey="bg_morning" stroke={MORNING} />
-            {/* Line for afternoon blood glucose values */}
-            <Line type="monotone" dataKey="bg_afternoon" stroke={AFTERNOON} />
-            {/* Line for evening blood glucose values */}
-            <Line type="monotone" dataKey="bg_evening" stroke={EVENING} />
-            <ReferenceArea y1={0} y2={50} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={50} y2={70} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={108} y2={180} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-            <ReferenceArea y1={280} y2={315} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-          </LineChart>
-        </ResponsiveContainer>
-      )}
-      {showChart && selectedChart === 'blood-glucose-breakdown' && (
-        <ResponsiveContainer width="80%" height={500}>
-          <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-            <Pie data={cleanData_bgBreakdown(data)} dataKey="value">
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
-      )}
-      {/* Display a message when 'Insulin Dosages' is selected, but no data is available */}
-      {showChart && selectedChart === 'insulin-dosages' && (
-        <Card sx={{ maxWidth: 400, mt: 5, mx: 'auto' }}>
-          <CardContent>
-            <Typography variant="h6" textAlign="center">
-              No Record
-            </Typography>
-          </CardContent>
-        </Card>
-      )}
+      <Box position="relative" width="80%" height={500}>
+        {/* Display the Blood Glucose line chart if selected */}
+        {selectedChart === 'blood-glucose' && (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData.length ? cleanData_bg(chartData) : cleanData_bg(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="created_at" axisLine="false"/>
+              <YAxis label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
+              <Tooltip content={<BG_Tooltip />}/>
+              <Legend />
+              {/* Line for morning blood glucose values */}
+              <Line type="monotone" dataKey="reading" stroke="#811e73" />
+              <ReferenceArea y1={0} y2={50} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={50} y2={70} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={108} y2={180} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={280} y2={315} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+        {/* Display the Blood Glucose Split line chart if selected */}
+        {selectedChart === 'blood-glucose-split' && (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData.length ? cleanData_bgSplit(chartData) : cleanData_bgSplit(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="created_at" axisLine="false"/>
+              <YAxis label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
+              <Tooltip content={<BGSplit_Tooltip />}/>
+              <Legend />
+              {/* Line for morning blood glucose values */}
+              <Line type="monotone" dataKey="bg_morning" stroke={MORNING} />
+              {/* Line for afternoon blood glucose values */}
+              <Line type="monotone" dataKey="bg_afternoon" stroke={AFTERNOON} />
+              {/* Line for evening blood glucose values */}
+              <Line type="monotone" dataKey="bg_evening" stroke={EVENING} />
+              <ReferenceArea y1={0} y2={50} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={50} y2={70} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={108} y2={180} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={280} y2={315} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+        {/* Display the pie chart if selected */}
+        {selectedChart === 'blood-glucose-breakdown' && (
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <Pie data={chartData.length ? cleanData_bgBreakdown(chartData) : cleanData_bgBreakdown(data)} dataKey="value">
+                {COLORS.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
+        {/* Display the Insuline Dosage line chart if selected */}
+        {selectedChart === 'insulin-dosages' && (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData.length ? cleanData_id(chartData) : cleanData_id(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="created_at" axisLine="false"/>
+              <YAxis label={{ value: 'units', angle: -90, position: 'insideLeft' }}  />
+              <Tooltip />
+              <Legend />
+              {<Line type="monotone" dataKey="reading" stroke={MORNING} />}
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+        {/* Gray out overlay and "No Record" card if using placeholder data */}
+        {hasError && (
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            width="100%"
+            height="100%"
+            bgcolor="rgba(255, 255, 255, 0.75)"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Card sx={{ maxWidth: 400 }}>
+              <CardContent>
+                <Typography variant="h6" textAlign="center">
+                  No Record
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
