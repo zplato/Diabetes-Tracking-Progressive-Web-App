@@ -1,21 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, TextField, Button, Typography, Modal, Card, CardContent } from '@mui/material';
 import { WbSunny, Cloud, Nightlight } from '@mui/icons-material';
 import axios from 'axios';
 
-export function MySugarAndInsulin() {
-
-  // Helper function to get today's date in 'YYYY-MM-DD' format
-  const getTodayDate = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const day = today.getDate().toString().padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
+export function MySugarAndInsulin({ accountID, username, firstName }) {
   // State variables to track inputs for each time of day and the entry date
-  const [entryDate, setEntryDate] = useState(getTodayDate());
+  const [entryDate, setEntryDate] = useState('');
   const [morningGlucose, setMorningGlucose] = useState('');
   const [morningInsulin, setMorningInsulin] = useState('');
   const [afternoonGlucose, setAfternoonGlucose] = useState('');
@@ -23,11 +13,10 @@ export function MySugarAndInsulin() {
   const [eveningGlucose, setEveningGlucose] = useState('');
   const [eveningInsulin, setEveningInsulin] = useState('');
   const [open, setOpen] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
   // Function to clear all the input fields
   const handleClear = () => {
-    setEntryDate(getTodayDate()); // Reset to today's date
+    setEntryDate('');
     setMorningGlucose('');
     setMorningInsulin('');
     setAfternoonGlucose('');
@@ -52,26 +41,22 @@ export function MySugarAndInsulin() {
         // Define the API URL (use the appropriate environment endpoint)
         const apiUrl = 'https://cs6440groupproj.onrender.com/entries';
 
-        // Get account_id from local storage or context (assuming the user is logged in)
-        const accountId = localStorage.getItem('account_id');
-
         // Construct the payload
         const payload = {
-          account_id: accountId,
+          account_id: accountID,
           entry_date: entryDate,
           bg_morning: morningGlucose,
           ins_morning: morningInsulin,
           bg_afternoon: afternoonGlucose,
           ins_afternoon: afternoonInsulin,
           bg_evening: eveningGlucose,
-          ins_evening: eveningInsulin,
+          ins_evening: eveningInsulin
         };
 
         // Make a POST request to the API
         const response = await axios.post(apiUrl, payload, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Use the auth token
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${localStorage.getItem('authToken')}` // Use the auth token
           }
         });
 
@@ -82,10 +67,7 @@ export function MySugarAndInsulin() {
       } catch (error) {
         console.error('Error saving entry:', error);
         // Handle error - show a message or do some error logging
-        setErrorMessage('An error occurred while saving the entry. Please try again.');
       }
-    } else {
-      setErrorMessage('Please fill in all required fields');
     }
   };
 
@@ -130,72 +112,95 @@ export function MySugarAndInsulin() {
             <WbSunny sx={{ mr: 1 , color: 'orange', pl: 3}} /> 
             <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Morning</Typography>
           </Box>
-          <TextField
-            label="mg/dl"
+          <input
+            placeholder="mg/dl"
             type="number"
-            variant="outlined"
             value={morningGlucose}
-            onChange={(e) => setMorningGlucose(e.target.value)}
+            onChange={(e) => {
+              const value = Math.max(0, Math.min(1000, parseInt(e.target.value) || 0));
+              setMorningGlucose(value);
+            }}
+            min={0}
+            max={1000}
             required
-          />                              
-          <TextField
-            label="units"
+            style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
+          <input
+            placeholder="units"
             type="number"
-            variant="outlined"
             value={morningInsulin}
-            onChange={(e) => setMorningInsulin(e.target.value)}
+            onChange={(e) => {
+              const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+              setMorningInsulin(value);
+            }}
+            min={0}
+            max={100}
             required
-          />          
+            style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
           {/* Afternoon readings inputs */}
           <Box display="flex" alignItems="center">
             <Cloud sx={{ mr: 1 , color: '#90CFFC', pl: 3}} /> 
             <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Afternoon</Typography>
           </Box>
-          <TextField
-            label="mg/dl"
+          <input
+            placeholder="mg/dl"
             type="number"
-            variant="outlined"
             value={afternoonGlucose}
-            onChange={(e) => setAfternoonGlucose(e.target.value)}
+            onChange={(e) => {
+              const value = Math.max(0, Math.min(1000, parseInt(e.target.value) || 0));
+              setAfternoonGlucose(value);
+            }}
+            min={0}
+            max={1000}
             required
+            style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
-          <TextField
-            label="units"
+          <input
+            placeholder="units"
             type="number"
-            variant="outlined"
             value={afternoonInsulin}
-            onChange={(e) => setAfternoonInsulin(e.target.value)}
+            onChange={(e) => {
+              const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+              setAfternoonInsulin(value);
+            }}
+            min={0}
+            max={100}
             required
-          />          
+            style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
+          />
           {/* Evening readings inputs */}
           <Box display="flex" alignItems="center">
             <Nightlight sx={{ mr: 1 , color: '#8B79B5', pl: 3}} /> 
             <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Evening</Typography>
           </Box>
-          <TextField
-            label="mg/dl"
+          <input
+            placeholder="mg/dl"
             type="number"
-            variant="outlined"
             value={eveningGlucose}
-            onChange={(e) => setEveningGlucose(e.target.value)}
+            onChange={(e) => {
+              const value = Math.max(0, Math.min(1000, parseInt(e.target.value) || 0));
+              setEveningGlucose(value);
+            }}
+            min={0}
+            max={1000}
             required
+            style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
-          <TextField
-            label="units"
+          <input
+            placeholder="units"
             type="number"
-            variant="outlined"
             value={eveningInsulin}
-            onChange={(e) => setEveningInsulin(e.target.value)}
+            onChange={(e) => {
+              const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+              setEveningInsulin(value);
+            }}
+            min={0}
+            max={100}
             required
+            style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
         </Box>
-
-        {/* Display error message if entry submission fails */}
-        {errorMessage && (
-          <Typography variant="body2" color="error" mt={2}>
-            {errorMessage}
-          </Typography>
-        )}
 
         {/* Buttons to clear inputs or submit the form */}
         <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={5} mt={2}>          
