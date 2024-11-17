@@ -3,7 +3,7 @@ import { Box, Typography, Card, CardContent, FormControl, InputLabel, Select, Me
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceArea, PieChart, Pie, Cell } from 'recharts';
 import axios from 'axios';
 
-export function MyCharts() {
+export function MyCharts({ accountID, username, firstName }) {
   // State to store the currently selected chart type from the dropdown
   const [selectedChart, setSelectedChart] = useState('blood-glucose');
   // State to store fetched chart data
@@ -28,8 +28,7 @@ export function MyCharts() {
   // Function to fetch chart data from the API
   const fetchChartData = async () => {
     try {
-      const accountId = localStorage.getItem('account_id');
-      const response = await axios.get(`https://cs6440groupproj.onrender.com/entries?account_id=${accountId}`);
+      const response = await axios.get(`https://cs6440groupproj.onrender.com/entries?account_id=${accountID}`);
       if (response.status === 200) {
         setChartData(response.data);
         setHasError(false);

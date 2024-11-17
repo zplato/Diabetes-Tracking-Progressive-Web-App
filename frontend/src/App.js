@@ -15,6 +15,9 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   // State to store the username of the logged-in user
   const [username, setUsername] = React.useState('');
+  // State to store the account ID of the logged-in user
+  const [accountID, setAccountID] = React.useState('');
+  // State to store the first name of the logged-in user
   const [firstName, setFirstName] = React.useState('');
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,10 +47,11 @@ function App() {
     }
   };
 
-  // Function to handle login, setting the user as logged in and storing the username
+  // Function to handle login, setting the user as logged in and storing the username, accountID, and firstName
   const handleLogin = (user) => {
     setIsLoggedIn(true);
     setUsername(user.username);
+    setAccountID(user.account_id);
     setFirstName(user.first_name);
     navigate('/my-sugar-insulin');
   };
@@ -56,6 +60,7 @@ function App() {
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUsername('');
+    setAccountID('');
     setFirstName('');
     navigate('/login');
   };
@@ -71,7 +76,7 @@ function App() {
           <Typography sx={{ flexGrow: 1, fontSize: '19px', letterSpacing: '0.7px' }}>
             MAZNA Tech - Diabetes App for Kids!
           </Typography>
-          {/* Display the username when logged in */}
+          {/* Display the first name when logged in */}
           {isLoggedIn && (
             <Typography sx={{ fontSize: '16px', letterSpacing: '0.7px', mr: 3}}>
               Hello, {firstName}!
@@ -128,9 +133,9 @@ function App() {
 
           {/* Define the routes for logged-in pages */}
           <Routes>
-            <Route path="/my-sugar-insulin" element={<MySugarAndInsulin />} />
-            <Route path="/my-charts" element={<MyCharts />} />
-            <Route path="/my-achievements" element={<MyAchievements firstName={firstName} />} />
+            <Route path="/my-sugar-insulin" element={<MySugarAndInsulin accountID={accountID} username={username} firstName={firstName} />} />
+            <Route path="/my-charts" element={<MyCharts accountID={accountID} username={username} firstName={firstName} />} />
+            <Route path="/my-achievements" element={<MyAchievements accountID={accountID} username={username} firstName={firstName} />} />
           </Routes>
         </Box>
       ) : (
