@@ -54,11 +54,12 @@ export function MyCharts() {
   const EVENING = "#300056";
 
   const VERY_LOW_HIGH = "#FF6961"
-  const LOW_BORDERLINE = "#F8D66D"
+  const LOW = "#F8D66D"
   const NORMAL = "#8CD47E"
+  const BORDERLINE = "#C6C565"
   const HIGH = "#FFB54C"
 
-  const COLORS = [VERY_LOW_HIGH, LOW_BORDERLINE, NORMAL, LOW_BORDERLINE, HIGH, VERY_LOW_HIGH];
+  const COLORS = [VERY_LOW_HIGH, LOW, NORMAL, BORDERLINE, HIGH, VERY_LOW_HIGH];
 
   function getValueText(value) {
     // Defaults to NORMAL
@@ -70,11 +71,11 @@ export function MyCharts() {
     }
     else if (value >= 51 && value < 70) {
       level = "LOW";
-      tcolor = LOW_BORDERLINE;
+      tcolor = LOW;
     }
     else if (value >= 109 && value < 180) {
       level = "BORDERLINE";
-      tcolor = LOW_BORDERLINE;
+      tcolor = BORDERLINE;
     }
     else if (value >= 181 && value < 280) {
       level = "HIGH";
@@ -91,9 +92,12 @@ export function MyCharts() {
 
   function cleanData_bgSplit(data_in) {
     for (let i in data_in) {
-      let pretty_date = data_in[i]["created_at"].split(" ")[0];
+      let pretty_date = data_in[i]["created_at"].split("T")[0];
       pretty_date = new Date(pretty_date.replace(/-/g, '/'));
       data_in[i]["created_at"] = pretty_date.toDateString();
+      data_in[i]["bg_morning"] = parseFloat(data_in[i]["bg_morning"]);
+      data_in[i]["bg_afternoon"] = parseFloat(data_in[i]["bg_afternoon"]);
+      data_in[i]["bg_evening"] = parseFloat(data_in[i]["bg_evening"]);
     }
     return data_in
   };
@@ -101,13 +105,13 @@ export function MyCharts() {
   function cleanData_bg(data_in) {
     let new_data = [];
     for (let i in data_in) {
-      let pretty_date = data_in[i]["created_at"].split(" ")[0];
+      let pretty_date = data_in[i]["created_at"].split("T")[0];
       pretty_date = new Date(pretty_date.replace(/-/g, '/'));
       pretty_date = pretty_date.toDateString();
       
-      new_data.push( { created_at: pretty_date, reading: data_in[i]["bg_morning"] });
-      new_data.push( { created_at: pretty_date, reading: data_in[i]["bg_afternoon"] });
-      new_data.push( { created_at: pretty_date, reading: data_in[i]["bg_evening"] });
+      new_data.push( { created_at: pretty_date, reading: parseFloat(data_in[i]["bg_morning"]) });
+      new_data.push( { created_at: pretty_date, reading: parseFloat(data_in[i]["bg_afternoon"]) });
+      new_data.push( { created_at: pretty_date, reading: parseFloat(data_in[i]["bg_evening"]) });
     }
     return new_data;
   };
@@ -115,13 +119,13 @@ export function MyCharts() {
   function cleanData_id(data_in) {
     let new_data = [];
     for (let i in data_in) {
-      let pretty_date = data_in[i]["created_at"].split(" ")[0];
+      let pretty_date = data_in[i]["created_at"].split("T")[0];
       pretty_date = new Date(pretty_date.replace(/-/g, '/'));
       pretty_date = pretty_date.toDateString();
       
-      new_data.push( { created_at: pretty_date, reading: data_in[i]["ins_morning"] });
-      new_data.push( { created_at: pretty_date, reading: data_in[i]["ins_afternoon"] });
-      new_data.push( { created_at: pretty_date, reading: data_in[i]["ins_evening"] });
+      new_data.push( { created_at: pretty_date, reading: parseFloat(data_in[i]["ins_morning"]) });
+      new_data.push( { created_at: pretty_date, reading: parseFloat(data_in[i]["ins_afternoon"]) });
+      new_data.push( { created_at: pretty_date, reading: parseFloat(data_in[i]["ins_evening"]) });
     }
     return new_data;
   };
@@ -166,9 +170,9 @@ export function MyCharts() {
       return(
       <div className="tooltip">
         <h4>{pretty_date.toDateString()}</h4>
-        <p>Morning: {getValueText(payload[0].value)}</p>
-        <p>Afternoon: {getValueText(payload[1].value)}</p>
-        <p>Evening: {getValueText(payload[2].value)}</p>
+        <p>Morning: {payload[0].value} - {getValueText(payload[0].value)}</p>
+        <p>Afternoon: {payload[1].value} - {getValueText(payload[1].value)}</p>
+        <p>Evening: {payload[2].value} - {getValueText(payload[2].value)}</p>
       </div>
       );
     }
@@ -181,12 +185,26 @@ export function MyCharts() {
       return(
       <div className="tooltip">
         <h4>{pretty_date.toDateString()}</h4>
-        <p>Reading: {getValueText(payload[0].value)}</p>
+        <p>Reading: {payload[0].value} - {getValueText(payload[0].value)}</p>
       </div>
       );
     }
   };
-  
+
+  const BGBreakdown_Tooltip = ({active, payload, label}) => {
+    if (active && payload && payload.length) {
+      let tcolor = NORMAL;
+      if (payload[0].name === "LOW") {tcolor = LOW;}
+      else if (payload[0].name === "VERY LOW" || payload[0].name === "VERY HIGH") {tcolor = VERY_LOW_HIGH;}
+      else if (payload[0].name === "BORDERLINE") {tcolor = BORDERLINE;}
+      else if (payload[0].name === "HIGH") {tcolor = HIGH;}
+      return(
+      <div className="tooltip">
+        <p><span style={{color: tcolor}}><strong color={NORMAL}>{payload[0].name}</strong></span> {payload[0].value}</p>
+      </div>
+      );
+    }
+  };
 
   return (
     <Box p={3} display="flex" flexDirection="column" alignItems="center">
@@ -216,18 +234,18 @@ export function MyCharts() {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData.length ? cleanData_bg(chartData) : cleanData_bg(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="created_at" axisLine="false"/>
-              <YAxis label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
+              <XAxis dataKey="created_at" />
+              <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<BG_Tooltip />}/>
               <Legend />
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="reading" stroke="#811e73" />
               <ReferenceArea y1={0} y2={50} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={50} y2={70} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={50} y2={70} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
               <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={108} y2={180} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={108} y2={180} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
               <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={280} y2={315} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={280} y2={1000} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -237,7 +255,7 @@ export function MyCharts() {
             <LineChart data={chartData.length ? cleanData_bgSplit(chartData) : cleanData_bgSplit(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_at" axisLine="false"/>
-              <YAxis label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
+              <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<BGSplit_Tooltip />}/>
               <Legend />
               {/* Line for morning blood glucose values */}
@@ -247,11 +265,11 @@ export function MyCharts() {
               {/* Line for evening blood glucose values */}
               <Line type="monotone" dataKey="bg_evening" stroke={EVENING} />
               <ReferenceArea y1={0} y2={50} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={50} y2={70} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={50} y2={70} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
               <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={108} y2={180} fill={LOW_BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={108} y2={180} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
               <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={280} y2={315} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={280} y2={1000} fill={VERY_LOW_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -259,12 +277,12 @@ export function MyCharts() {
         {selectedChart === 'blood-glucose-breakdown' && (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <Pie data={chartData.length ? cleanData_bgBreakdown(chartData) : cleanData_bgBreakdown(data)} dataKey="value">
+              <Pie data={chartData.length ? cleanData_bgBreakdown(chartData) : cleanData_bgBreakdown(data)} dataKey="value" innerRadius={100}>
                 {COLORS.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
+              <Tooltip content={<BGBreakdown_Tooltip /> } />
             </PieChart>
           </ResponsiveContainer>
         )}

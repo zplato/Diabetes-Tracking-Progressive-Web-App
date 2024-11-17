@@ -162,12 +162,12 @@ class UserBgInsResource(Resource):
                 'account_id': entry.account_id,
                 'created_at': entry.created_at.isoformat(),
                 'updated_at': entry.updated_at.isoformat(),
-                'bg_morning': str(entry.bg_morning) if entry.bg_morning else None,
-                'bg_afternoon': str(entry.bg_afternoon) if entry.bg_afternoon else None,
-                'bg_evening': str(entry.bg_evening) if entry.bg_evening else None,
-                'ins_morning': str(entry.ins_morning) if entry.ins_morning else None,
-                'ins_afternoon': str(entry.ins_afternoon) if entry.ins_afternoon else None,
-                'ins_evening': str(entry.ins_evening) if entry.ins_evening else None
+                'bg_morning': entry.bg_morning if entry.bg_morning else None,
+                'bg_afternoon': entry.bg_afternoon if entry.bg_afternoon else None,
+                'bg_evening': entry.bg_evening if entry.bg_evening else None,
+                'ins_morning': entry.ins_morning if entry.ins_morning else None,
+                'ins_afternoon': entry.ins_afternoon if entry.ins_afternoon else None,
+                'ins_evening': entry.ins_evening if entry.ins_evening else None
             }
         else:
             # Get all entries with optional filtering by account_id
@@ -181,18 +181,19 @@ class UserBgInsResource(Resource):
                         'message': f'Invalid account_id: {account_id}'
                     }, 400
                 query = query.filter_by(account_id=account_id)
-            entries = query.order_by(UserBgIns.created_at.desc()).all()
+            entries = query.order_by(UserBgIns.created_at.asc()).all()
+            print(entries)
             return [{
                 'id': entry.id,
                 'account_id': entry.account_id,
                 'created_at': entry.created_at.isoformat(),
                 'updated_at': entry.updated_at.isoformat(),
-                'bg_morning': str(entry.bg_morning) if entry.bg_morning else None,
-                'bg_afternoon': str(entry.bg_afternoon) if entry.bg_afternoon else None,
-                'bg_evening': str(entry.bg_evening) if entry.bg_evening else None,
-                'ins_morning': str(entry.ins_morning) if entry.ins_morning else None,
-                'ins_afternoon': str(entry.ins_afternoon) if entry.ins_afternoon else None,
-                'ins_evening': str(entry.ins_evening) if entry.ins_evening else None
+                'bg_morning': entry.bg_morning if entry.bg_morning else None,
+                'bg_afternoon': entry.bg_afternoon if entry.bg_afternoon else None,
+                'bg_evening': entry.bg_evening if entry.bg_evening else None,
+                'ins_morning': entry.ins_morning if entry.ins_morning else None,
+                'ins_afternoon': entry.ins_afternoon if entry.ins_afternoon else None,
+                'ins_evening': entry.ins_evening if entry.ins_evening else None
             } for entry in entries]
 
     def post(self):
