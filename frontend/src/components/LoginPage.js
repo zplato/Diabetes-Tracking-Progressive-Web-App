@@ -24,7 +24,7 @@ export function LoginPage({ onLogin }) {
       
       if (isLocalhost) {
         // Directly set the user as logged in when testing on localhost because CORS seems to block access
-        onLogin(username);
+        onLogin({id: 1, message: 'Login successful', username: username, first_name: 'LOCALHOST USER'});
       } else {
         try {
           // Determine API URL based on environment - Used for testing but should probably be the production link only
@@ -39,7 +39,7 @@ export function LoginPage({ onLogin }) {
           // If the login is successful, call the provided onLogin function with the username
           if (response.status === 200) {
             const userData = response.data;
-            onLogin(userData.username);
+            onLogin(userData);
           }
         } catch (error) {
           // Handle any errors during the login process
@@ -49,7 +49,7 @@ export function LoginPage({ onLogin }) {
             setErrorMessage('An error occurred. Please try again later.');
           }
         }
-      }
+     }
     } else {
       setErrorMessage('Please provide both username and password');
     }
