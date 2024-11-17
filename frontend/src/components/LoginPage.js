@@ -53,7 +53,7 @@ export function LoginPage({ onLogin }) {
             setErrorMessage('An error occurred. Please try again later.');
           }
         }
-      }
+     }
     } else {
       setErrorMessage('Please provide both username and password');
     }
