@@ -12,7 +12,8 @@ import json
 # Local Imports
 from common_utils import valid_dob
 from db import db, check_connection
-from models import Account, UserBgIns  
+from models import Account, UserBgIns, UserAchv
+
 
 # Create a custom JSON encoder
 class DecimalEncoder(json.JSONEncoder):
@@ -42,8 +43,6 @@ environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Co
                                         # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
 
 # Global Default Vars
-default_rank = "Bronze"
-default_num_points = 0
 db_initialized = False
 
 ###########################
@@ -114,6 +113,9 @@ class ValidateUserLogin(Resource):
         else:
             return {"message": "Invalid username or password"}, 401
 
+# This API does a couple of things:
+# 1. Creates User Account and saves account information to the 'accounts' table
+# 2. Creates Default User Achievement record linked to account and saves it in the user achievement
 class CreateUserAccount(Resource):
     def post(self):
 
@@ -163,10 +165,27 @@ class CreateUserAccount(Resource):
         db.session.add(new_user)
         try:
             db.session.commit()
-            return {"message": "User created successfully"}, 201  # Created
         except IntegrityError:
             db.session.rollback()
             return {"message": "Error creating user. Please try again."}, 500  # Internal Server Error
+
+        # Add Default User Achievement - Now that the User Account is created and ID is initialized
+        default_rank = "Bronze"
+        default_num_points = 0
+        default_achievement = UserAchv(
+            current_rank = default_rank,
+            current_points = default_num_points
+        )
+
+        # Add the default user achievement record to the session and commit
+        db.session.add(default_achievement)
+        try:
+            db.session.commit()
+            return {"message": "User created successfully"}, 201  # Created User Account and Achievement record
+        except IntegrityError:
+            db.session.rollback()
+            return {"message": "Error creating user achievement. Please try again."}, 500  # Internal Server Error
+
 
 class UserBgInsResource(Resource):
     def get(self, entry_id=None):
