@@ -4,19 +4,35 @@ from flask import Flask, request
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from sqlalchemy.exc import IntegrityError
+from decimal import Decimal
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
+import json
 
 # Local Imports
 from common_utils import valid_dob
 from db import db, check_connection
-from models import Account, UserBgIns
+from models import Account, UserBgIns  
 
+# Create a custom JSON encoder
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super().default(obj)
 
 # Flask Stuff
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+
+# Configure Flask-RESTful to use the custom encoder
+@api.representation('application/json')
+def output_json(data, code, headers=None):
+    resp = app.make_response(json.dumps(data, cls=DecimalEncoder))
+    resp.headers.extend(headers or {})
+    resp.headers['Content-Type'] = 'application/json'
+    return resp
 
 # Load environment variables from .env file
 dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
