@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash
 
 # Internal Imports
 from db import db
-from models import Account
+from models import Account, UserAchv
 from src.app import app, init_db
 
 
@@ -90,19 +90,42 @@ class TestCreateUserAccount(unittest.TestCase):
     def test_create_user_success(self):
         """Test creating a user successfully."""
         dob = date(1995, 4, 23).isoformat() # Convert to date object
-        response = self.client.post('/createUserAccount',
-                                     data=json.dumps({
-                                         "username": "new_user3",
-                                         "password": "password123",
-                                         "firstname": "John",
-                                         "middlename": "Doe",
-                                         "lastname": "Smith",
-                                         "dob": dob
-                                     }),
-                                     content_type='application/json')
+        user_data = json.dumps({
+                                 "username": "new_user7",
+                                 "password": "password123",
+                                 "firstname": "John",
+                                 "middlename": "Doe",
+                                 "lastname": "Smith",
+                                 "dob": dob
+                                })
+        response = self.client.post('/createUserAccount', data= user_data, content_type='application/json')
 
+        # Check HTTP Request Response
         self.assertEqual(response.status_code, 201)
         self.assertIn(b'User created successfully', response.data)
+        print("HTTP Response Status Code: {0}\n"
+              "HTTP Response Message: {1}".format(response.status_code, response.get_data(as_text=True)))
+
+        # Now query the database to ensure that the user has been created
+        user_data_dict = json.loads(user_data)
+        with self.app.app_context():
+            new_user = Account.query.filter_by(username=user_data_dict["username"]).first()
+        self.assertIsNotNone(new_user, "User should be created in the database")
+        print("User Exists in Database.\n")
+
+        # Query the UserAchv table to ensure the default achievement record was created
+        with self.app.app_context():
+            user_achievement = UserAchv.query.filter_by(account_id=new_user.id).first()
+        self.assertIsNotNone(user_achievement, "User achievement should be created for the new user")
+
+        # Check that the default rank and points are set correctly
+        self.assertEqual(user_achievement.current_rank, "Bronze")
+        self.assertEqual(str(user_achievement.current_points), "0")
+        print("User Achievement:\n"
+              "\taccount_id: {0},\n"
+              "\tcurrent_rank: {1},\n"
+              "\tcurrent_points: {2}".format(user_achievement.account_id, user_achievement.current_rank, user_achievement.current_points))
+
 
 if __name__ == '__main__':
     unittest.main()

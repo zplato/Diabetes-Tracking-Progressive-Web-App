@@ -1,6 +1,6 @@
 # External Imports
 from dotenv import load_dotenv
-from flask import Flask, request
+from flask import Flask, request, jsonify, make_response
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from sqlalchemy.exc import IntegrityError
@@ -12,7 +12,8 @@ import json
 # Local Imports
 from common_utils import valid_dob
 from db import db, check_connection
-from models import Account, UserBgIns  
+from models import Account, UserBgIns, UserAchv
+
 
 # Create a custom JSON encoder
 class DecimalEncoder(json.JSONEncoder):
@@ -42,8 +43,6 @@ environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Co
                                         # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
 
 # Global Default Vars
-default_rank = "Bronze"
-default_num_points = 0
 db_initialized = False
 
 ###########################
@@ -70,11 +69,12 @@ def init_db(env):
         app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    # Not using the Flask-SQLAlchemy's event system, set explicitly to false in order to get rid of warning
         db.init_app(app)                                        # Bind the app to the db instance
+        is_connected, message = check_connection(app)           # Verify the database connection
+        print(message)                                          # Printing to the STDOUT is fine for now
 
     global db_initialized
     db_initialized = True
-    is_connected, message = check_connection(app)           # Verify the database connection
-    print(message)                                          # Printing to the STDOUT is fine for now
+
 
 #--- End DB init ---#
 
@@ -98,7 +98,7 @@ class ValidateUserLogin(Resource):
 
         # Validate input
         if not username or not password:
-            return {"message": "Username and password are required"}, 400
+            return make_response({"message": "Username and password are required"}, 400)
 
         # Query the database for the user using SQLAlchemy ORM
         user = Account.query.filter_by(username=username).first()
@@ -112,8 +112,11 @@ class ValidateUserLogin(Resource):
                 "first_name": user.first_name
             }, 200
         else:
-            return {"message": "Invalid username or password"}, 401
+            return make_response({"message": "Invalid username or password"},401)
 
+# This API does a couple of things:
+# 1. Creates User Account and saves account information to the 'accounts' table
+# 2. Creates Default User Achievement record linked to account and saves it in the user achievement
 class CreateUserAccount(Resource):
     def post(self):
 
@@ -132,20 +135,20 @@ class CreateUserAccount(Resource):
         if not username or not password or not firstname or not lastname or not dob:
             invalid_input_message = ("Not all required fields are present. "
                        "Ensure username, password, firstname, lastname, and dob are passed as part of the request.")
-            return {"message": invalid_input_message }, 400
+            return make_response({"message": invalid_input_message }, 400)
 
         # Validate username - check if it already exists
         # Query the database for the user using SQLAlchemy ORM
         user = Account.query.filter_by(username=username).first()
         if user:
             already_existing_user_message = "Username already exists"
-            return {"message": already_existing_user_message}, 409 # Conflict - username already exists
+            return make_response({"message": already_existing_user_message}, 409) # Conflict - username already exists
 
         # Validate dob
         is_valid_dob, formatted_dob = valid_dob(dob)
         if not is_valid_dob:
             not_valid_dob_message = "Not a valid dob, ensure its formatted as YYYY-MM-DD"
-            return {"message": not_valid_dob_message}, 400
+            return make_response({"message": not_valid_dob_message}, 400)
 
         # At this point, everything is gucci - lets create that user!
         hashed_password = generate_password_hash(password)
@@ -163,10 +166,39 @@ class CreateUserAccount(Resource):
         db.session.add(new_user)
         try:
             db.session.commit()
-            return {"message": "User created successfully"}, 201  # Created
+            print("User Created Successfully!\n \tusername: {0},\n \tuser_id: {1}".format(new_user.username, new_user.id))
         except IntegrityError:
             db.session.rollback()
-            return {"message": "Error creating user. Please try again."}, 500  # Internal Server Error
+            return make_response({"message": "Error creating user. Please try again."}, 500)  # Internal Server Error
+
+        # Add Default User Achievement - Now that the User Account is created and ID is initialized
+        default_rank = "Bronze"
+        default_num_points = 0
+        default_achievement = UserAchv(
+            account_id = new_user.id,
+            current_rank = default_rank,
+            current_points = default_num_points
+        )
+
+        # Add the default user achievement record to the session and commit
+        db.session.add(default_achievement)
+        try:
+            db.session.commit()
+
+            # Create the response
+            response_data = {
+                "ID": new_user.id,
+                "message": "User created successfully"
+            }
+
+            # Use make_response to create the Response object with custom status code
+            response = make_response(jsonify(response_data), 201)  # 201 = Created Status Code
+            return response
+
+        except IntegrityError:
+            db.session.rollback()
+            return make_response({"message": "Error creating user achievement. Please try again."}, 500)  # Internal Server Error
+
 
 class UserBgInsResource(Resource):
     def get(self, entry_id=None):
@@ -313,18 +345,23 @@ api.add_resource(TestEnvironment, '/testEnv')
 # Starts the Flask Application in Debug Mode
 # Run this file and open a browser to view, go to the following default http://Hostname:Port
 # Hostname:Port -  http://localhost:5000 || http://127.0.0.1:5000
+# Note  -   With Debug Mode active, you cannot utilize the builtin debugger from an IDE such as Pycharm
+#           See More information here: https://flask.palletsprojects.com/en/stable/debugging/#external-debuggers
 def main():
     print("Running Locally")
     with app.app_context():
         init_db(environment)
-        app.run(debug=True)
+        app.run(debug=True) # Utilize Flasks builtin auto-reload debugger
+        # app.run(debug=True, use_debugger=False, use_reloader=False) # If you want to run with an External Debugger (e.g., PyCharm IDE Debugger)
 
 if __name__ == '__main__':
     main()
 
 # Initialization for Render
-# Render doesn't utilize 'main()' function,it runs gunicorn app:app directly
-if not db_initialized:
+# Render doesn't utilize 'main()' function, it runs gunicorn app:app directly
+# Check if this is Render Running this app, else its a unit test and for unit tests then -
+#   we don't want it to enter this block of code because the unit tests have their own setup and teardown.
+if (not db_initialized) and os.getenv('IS_RENDER').lower() == 'true':
     print("Running on PROD - Render Instance")
     with app.app_context():
         init_db(environment)

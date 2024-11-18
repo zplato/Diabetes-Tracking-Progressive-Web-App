@@ -1,3 +1,5 @@
+from sqlalchemy import Nullable
+
 from db import db
 from datetime import datetime
 
@@ -17,7 +19,7 @@ class Account(db.Model):
     # ranking = db.Column(db.Integer)
     # points = db.Column(db.Integer)
 
-# Add Additional Tables below
+# Define the User Blood Glucose and Insulin Records Table
 class UserBgIns(db.Model):
     __tablename__ = 'user_bg_ins'
 
@@ -34,3 +36,17 @@ class UserBgIns(db.Model):
 
     # Add relationship to Account model
     account = db.relationship('Account', backref=db.backref('bg_ins_entries', lazy=True))
+
+# Define the User Achievement Table
+class UserAchv(db.Model):
+    __tablename__ = 'user_achv'
+
+    # Columns
+    id = db.Column(db.Integer, primary_key=True)
+    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
+    current_rank = db.Column(db.String(50), nullable=False)
+    current_points = db.Column(db.String(50), nullable=False)
+
+    # Add relationship to Account model
+    # Allows you to easily retrieve the user associated achievements from the account object
+    account = db.relationship('Account', backref=db.backref('user_achv_entry', lazy=True))
