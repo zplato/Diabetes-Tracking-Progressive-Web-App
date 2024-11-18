@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash
 
 # Internal Imports
 from db import db
-from models import Account
+from models import Account, UserAchv
 from src.app import app, init_db
 
 
@@ -78,7 +78,7 @@ class TestCreateUserAccount(unittest.TestCase):
         self.client = self.app.test_client()
 
         with self.app.app_context():
-            init_db("TEST")
+            init_db("PROD")
             db.create_all()  # Create database tables
 
     def tearDown(self):
@@ -101,8 +101,28 @@ class TestCreateUserAccount(unittest.TestCase):
                                      }),
                                      content_type='application/json')
 
+        # Check HTTP Request Response
         self.assertEqual(response.status_code, 201)
         self.assertIn(b'User created successfully', response.data)
+        print("HTTP Response Status Code: {0}\n"
+              "HTTP Response Message: {1}".format(response.status_code, response.get_data(as_text=True)))
+
+        # Now query the database to ensure that the user has been created
+        with self.app.app_context():
+            new_user = Account.query.filter_by(username="new_user3").first()
+        self.assertIsNotNone(new_user, "User should be created in the database")
+        print("User Exists in Database")
+
+        # Query the UserAchv table to ensure the default achievement record was created
+        with self.app.app_context():
+            user_achievement = UserAchv.query.filter_by(account_id=new_user.id).first()
+        self.assertIsNotNone(user_achievement, "User achievement should be created for the new user")
+
+        # Check that the default rank and points are set correctly
+        self.assertEqual(user_achievement.current_rank, "Bronze")
+        self.assertEqual(user_achievement.current_points, "0")
+        print("User Achievement: {0}".format(user_achievement))
+
 
 if __name__ == '__main__':
     unittest.main()
