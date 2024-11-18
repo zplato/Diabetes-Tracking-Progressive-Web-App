@@ -359,6 +359,8 @@ if __name__ == '__main__':
 
 # Initialization for Render
 # Render doesn't utilize 'main()' function, it runs gunicorn app:app directly
+# Check if this is Render Running this app, else its a unit test and for unit tests then -
+#   we don't want it to enter this block of code because the unit tests have their own setup and teardown.
 if (not db_initialized) and os.getenv('IS_RENDER').lower() == 'true':
     print("Running on PROD - Render Instance")
     with app.app_context():
