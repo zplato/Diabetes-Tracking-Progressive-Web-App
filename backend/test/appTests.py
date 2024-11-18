@@ -78,7 +78,7 @@ class TestCreateUserAccount(unittest.TestCase):
         self.client = self.app.test_client()
 
         with self.app.app_context():
-            init_db("PROD")
+            init_db("TEST")
             db.create_all()  # Create database tables
 
     def tearDown(self):
