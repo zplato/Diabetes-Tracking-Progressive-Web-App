@@ -50,7 +50,7 @@ The following Endpoints are configured along with a basic description of their f
 * **Create User Account**
   * URL: `/createUserAccount`
   * Method: `POST`
-  * Description: This endpoint creates a user account provided a given username, firstname, middlename, lastname and date of birth. You may optionally provide a middle name. The password is hashed and the user, along with all their associated information is stored as an entry in the accounts table. Additionally, this endpoint initializes the User Achievement entry.
+  * Description: This endpoint creates a user account provided a given username, firstname, middlename (optional), lastname and date of birth (YYYY-MM-DD). The password is hashed and the user, along with all their associated information is stored as an entry in the accounts table. Additionally this endpoint creates and POSTS a patient resource to the HAPI FHIR test server (http://hapi.fhir.org/baseR4/Patient) and stores the response in the account entry. Lastly, this endpoint initializes the User Achievement entry. 
 * **Test Environment**
   * URL: `/testEnv`
   * Description: This endpoint returns a safe subset of environment variables, which helps in confirming the environment configuration without exposing sensitive information like passwords.

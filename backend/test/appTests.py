@@ -78,7 +78,7 @@ class TestCreateUserAccount(unittest.TestCase):
         self.client = self.app.test_client()
 
         with self.app.app_context():
-            init_db("TEST")
+            init_db("PROD")
             db.create_all()  # Create database tables
 
     def tearDown(self):
@@ -91,7 +91,7 @@ class TestCreateUserAccount(unittest.TestCase):
         """Test creating a user successfully."""
         dob = date(1995, 4, 23).isoformat() # Convert to date object
         user_data = json.dumps({
-                                 "username": "new_user7",
+                                 "username": "new_user8", # Need to change this if pointing to PROD DB, else will return that user already exists
                                  "password": "password123",
                                  "firstname": "John",
                                  "middlename": "Doe",

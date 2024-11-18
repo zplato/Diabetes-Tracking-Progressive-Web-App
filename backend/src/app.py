@@ -8,9 +8,10 @@ from decimal import Decimal
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import json
+import requests
 
 # Local Imports
-from common_utils import valid_dob
+from common_utils import valid_dob, build_patient_resource
 from db import db, check_connection
 from models import Account, UserBgIns, UserAchv
 
@@ -43,6 +44,7 @@ environment = os.getenv('ENVIRONMENT')  # PROD = Should be set via Render and Co
                                         # DEV (UNUSED) = Prod-like but another 'test' MySQL database could be used here?
 
 # Global Default Vars
+fhir_url = "http://hapi.fhir.org/baseR4/Patient"
 db_initialized = False
 
 ###########################
@@ -50,7 +52,7 @@ db_initialized = False
 ###########################
 def init_db(env):
     if 'SQLALCHEMY_DATABASE_URI' not in app.config: # If we don't already have a db for this sessions context
-        print("Initializing DB")
+        print("INFO: Initializing DB")
 
         # Production 'MySQL' Database
         if env == 'PROD':
@@ -63,7 +65,7 @@ def init_db(env):
         # UNSUPPORTED DATABASE!
         else:
             print("ERROR: ENVIRONMENT " + env + "is unsupported! Currently only supporting \'PROD\' or \'TEST\'.")
-            print("Check your .env file and ensure that you've specified the correct environment and try again. ")
+            print("ERROR: Check your .env file and ensure that you've specified the correct environment and try again. ")
             exit(1)
 
         app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
@@ -114,11 +116,18 @@ class ValidateUserLogin(Resource):
         else:
             return make_response({"message": "Invalid username or password"},401)
 
-# This API does a couple of things:
-# 1. Creates User Account and saves account information to the 'accounts' table
-# 2. Creates Default User Achievement record linked to account and saves it in the user achievement
 class CreateUserAccount(Resource):
     def post(self):
+
+        """
+        :Description:
+            Endpoint does 3 things:
+                1. Creates a new user account and saves the account info to the 'accounts' table.
+                2. Queries the HAPI FHIR test server with the 'Patient' Resource for a response and saves it to the accounts table.
+                2. Creates Default User Achievement record linked to account and saves it in the user achievement
+        :Returns:
+            Flask Response Object with a Message as data and status_code
+        """
 
         # Extract Data from Request
         data = request.get_json()
@@ -150,6 +159,19 @@ class CreateUserAccount(Resource):
             not_valid_dob_message = "Not a valid dob, ensure its formatted as YYYY-MM-DD"
             return make_response({"message": not_valid_dob_message}, 400)
 
+        # Create Patient in HAPI FHIR Test Server - Passing Patient Resource
+        # NOTE - This doesn't fail if the user already exists
+        patient_data = build_patient_resource(firstname, lastname, dob)
+        response = requests.post(fhir_url, json=patient_data, headers={'Content-Type': 'application/fhir+json'})
+
+        # Check if the POST request was successful
+        if response.status_code == 201:
+            print("INFO: Patient created successfully in FHIR Server.")
+        else:
+            print("ERROR: Response Status Code - {0} - Unable to create account in HAPI FHIR Server!"
+                  .format(response.status_code))
+            return make_response({"message": "Error communicating with FHIR server. Please try again."}, 500)  # Internal Server Error
+
         # At this point, everything is gucci - lets create that user!
         hashed_password = generate_password_hash(password)
         new_user = Account(
@@ -159,14 +181,14 @@ class CreateUserAccount(Resource):
             mid_name=middlename,
             last_name=lastname,
             dob=formatted_dob,
-            hapi_fhir_response="" # Empty String here - as at this point we don't have a response to give
+            hapi_fhir_response=response.text
         )
 
         # Add the new user to the session and commit
         db.session.add(new_user)
         try:
             db.session.commit()
-            print("User Created Successfully!\n \tusername: {0},\n \tuser_id: {1}".format(new_user.username, new_user.id))
+            print("INFO: User Created Successfully!\n \tusername: {0},\n \tuser_id: {1}".format(new_user.username, new_user.id))
         except IntegrityError:
             db.session.rollback()
             return make_response({"message": "Error creating user. Please try again."}, 500)  # Internal Server Error
@@ -348,7 +370,7 @@ api.add_resource(TestEnvironment, '/testEnv')
 # Note  -   With Debug Mode active, you cannot utilize the builtin debugger from an IDE such as Pycharm
 #           See More information here: https://flask.palletsprojects.com/en/stable/debugging/#external-debuggers
 def main():
-    print("Running Locally")
+    print("INFO: Running Locally")
     with app.app_context():
         init_db(environment)
         app.run(debug=True) # Utilize Flasks builtin auto-reload debugger
@@ -362,7 +384,7 @@ if __name__ == '__main__':
 # Check if this is Render Running this app, else its a unit test and for unit tests then -
 #   we don't want it to enter this block of code because the unit tests have their own setup and teardown.
 if (not db_initialized) and os.getenv('IS_RENDER').lower() == 'true':
-    print("Running on PROD - Render Instance")
+    print("INFO: Running on PROD - Render Instance")
     with app.app_context():
         init_db(environment)
 
