@@ -166,7 +166,7 @@ class CreateUserAccount(Resource):
         db.session.add(new_user)
         try:
             db.session.commit()
-            print("User created successfully, user_id: {0}".format(new_user.id))
+            print("User Created Successfully!\n \tusername: {0},\n \tuser_id: {1}".format(new_user.username, new_user.id))
         except IntegrityError:
             db.session.rollback()
             return make_response({"message": "Error creating user. Please try again."}, 500)  # Internal Server Error

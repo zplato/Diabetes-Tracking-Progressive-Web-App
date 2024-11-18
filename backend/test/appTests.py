@@ -78,7 +78,7 @@ class TestCreateUserAccount(unittest.TestCase):
         self.client = self.app.test_client()
 
         with self.app.app_context():
-            init_db("PROD")
+            init_db("TEST")
             db.create_all()  # Create database tables
 
     def tearDown(self):
@@ -90,16 +90,15 @@ class TestCreateUserAccount(unittest.TestCase):
     def test_create_user_success(self):
         """Test creating a user successfully."""
         dob = date(1995, 4, 23).isoformat() # Convert to date object
-        response = self.client.post('/createUserAccount',
-                                     data=json.dumps({
-                                         "username": "new_user3",
-                                         "password": "password123",
-                                         "firstname": "John",
-                                         "middlename": "Doe",
-                                         "lastname": "Smith",
-                                         "dob": dob
-                                     }),
-                                     content_type='application/json')
+        user_data = json.dumps({
+                                 "username": "new_user7",
+                                 "password": "password123",
+                                 "firstname": "John",
+                                 "middlename": "Doe",
+                                 "lastname": "Smith",
+                                 "dob": dob
+                                })
+        response = self.client.post('/createUserAccount', data= user_data, content_type='application/json')
 
         # Check HTTP Request Response
         self.assertEqual(response.status_code, 201)
@@ -108,10 +107,11 @@ class TestCreateUserAccount(unittest.TestCase):
               "HTTP Response Message: {1}".format(response.status_code, response.get_data(as_text=True)))
 
         # Now query the database to ensure that the user has been created
+        user_data_dict = json.loads(user_data)
         with self.app.app_context():
-            new_user = Account.query.filter_by(username="new_user3").first()
+            new_user = Account.query.filter_by(username=user_data_dict["username"]).first()
         self.assertIsNotNone(new_user, "User should be created in the database")
-        print("User Exists in Database")
+        print("User Exists in Database.\n")
 
         # Query the UserAchv table to ensure the default achievement record was created
         with self.app.app_context():
@@ -120,8 +120,11 @@ class TestCreateUserAccount(unittest.TestCase):
 
         # Check that the default rank and points are set correctly
         self.assertEqual(user_achievement.current_rank, "Bronze")
-        self.assertEqual(user_achievement.current_points, "0")
-        print("User Achievement: {0}".format(user_achievement))
+        self.assertEqual(str(user_achievement.current_points), "0")
+        print("User Achievement:\n"
+              "\taccount_id: {0},\n"
+              "\tcurrent_rank: {1},\n"
+              "\tcurrent_points: {2}".format(user_achievement.account_id, user_achievement.current_rank, user_achievement.current_points))
 
 
 if __name__ == '__main__':
