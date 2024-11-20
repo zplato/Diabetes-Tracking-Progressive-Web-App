@@ -83,7 +83,7 @@ The following Endpoints are configured along with a basic description of their f
       "ins_evening": "decimal(optional)"
     }
     ```
-
+π
 * **Update Entry** 
   * URL: `/entries/<entry_id>`
   * Method: `PUT`
@@ -94,3 +94,8 @@ The following Endpoints are configured along with a basic description of their f
   * URL: `/entries/<entry_id>`
   * Method: `DELETE`
   * Description: Deletes an existing entry
+
+* **Get User Achievements** 
+  * URL: `/getUserAchv?account_id=<account_id>`
+  * Method: `GET`
+  * Description: Get current user achievements rank and scores to rank up
