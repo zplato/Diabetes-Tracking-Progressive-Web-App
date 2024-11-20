@@ -13,7 +13,7 @@ import requests
 # Local Imports
 from common_utils import valid_dob, build_patient_resource
 from db import db, check_connection
-from models import Account, UserBgIns, UserAchv
+from models import Account, UserBgIns, UserAchv, AchvChart
 
 
 # Create a custom JSON encoder
@@ -342,6 +342,65 @@ class UserBgInsResource(Resource):
         except Exception as e:
             db.session.rollback()
             return {'message': f'Error deleting entry: {str(e)}'}, 500
+        
+class UserAchievementResource(Resource):
+    def get(self):
+        """Get user's current achievement status and points needed for next rank
+        
+        Required Query Parameter:
+        - account_id: The ID of the user account
+        
+        Returns:
+        - JSON with user's current achievement details and points needed for next rank
+        """
+        # Get account_id from query parameters
+        account_id = request.args.get('account_id', type=int)
+        
+        # Validate input
+        if not account_id:
+            return make_response({"message": "account_id is required"}, 400)
+            
+        try:
+            # Get user's current achievement
+            user_achv = UserAchv.query.filter_by(account_id=account_id).first()
+            if not user_achv:
+                return make_response({"message": f"No achievement record found for account_id: {account_id}"}, 404)
+            
+            # Get achievement chart data for next rank calculation
+            current_rank = user_achv.current_rank.upper()
+            current_points = user_achv.current_points
+            
+            # Get the ranks from achievement chart
+            achv_chart = AchvChart.query.all()
+            ranks_map = {record.ranking: {"min": record.min_points, "max": record.max_points} 
+                        for record in achv_chart}
+            
+            # Calculate points to next rank
+            points_to_rank_up = "Max Level!"
+            if current_rank != "GOLD":
+                if current_rank == "BRONZE":
+                    current_rank_max = ranks_map["BRONZE"]["max"]
+                elif current_rank == "SILVER":
+                    current_rank_max = ranks_map["SILVER"]["max"]
+                    
+                points_to_rank_up = (current_rank_max - current_points) + 5
+                if points_to_rank_up < 0:
+                    points_to_rank_up = 0
+            
+            # Construct response
+            response = {
+                "id": user_achv.id,
+                "message": "Achievement data retrieved successfully",
+                "firstName": user_achv.account.first_name,  # Assuming relationship exists in model
+                "currentRank": current_rank,
+                "currentPoints": current_points,
+                "pointsToRankUp": points_to_rank_up
+            }
+            
+            return make_response(response, 200)
+            
+        except Exception as e:
+            return make_response({"message": f"Error retrieving achievement data: {str(e)}"}, 500)
 
 class TestEnvironment(Resource):
     def get(self):
@@ -358,6 +417,7 @@ class TestEnvironment(Resource):
 ###########################
 #    Add API Resources    #
 ###########################
+api.add_resource(UserAchievementResource, '/getUserAchv')
 api.add_resource(UserBgInsResource, '/entries', '/entries/<int:entry_id>')
 api.add_resource(CreateUserAccount, '/createUserAccount')
 api.add_resource(ValidateUserLogin, '/validateUserLogin')
