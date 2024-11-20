@@ -12,3 +12,21 @@ def valid_dob(dob_str):
         return True, dob
     except ValueError:
         return False, None
+
+# Build a Data Struct based off patient data to prep to send to FHIR server
+def build_patient_resource(firstname, lastname, dob):
+
+    data = {
+        "resourceType": "Patient",
+        "active": True,
+        "name": [
+            {
+                "use": "official",
+                "family": lastname,
+                "given": firstname
+            }
+        ],
+        "birthDate": dob
+    }
+
+    return data

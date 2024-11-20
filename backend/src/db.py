@@ -13,11 +13,11 @@ def check_connection(app):
         # Get a connection from the engine and execute a simple query
         with db.engine.connect() as connection:
             connection.execute(text("SELECT 1"))
-        return True, "Database connection is successful. Connected to " + database_type
+        return True, "INFO: Database connection is successful. Connected to " + database_type
     except OperationalError as e:
-        return False, f"Database connection failed: {str(e)}"
+        return False, f"ERROR: Database connection failed: {str(e)}"
     except Exception as e:
-        return False, f"An error occurred: {str(e)}"
+        return False, f"ERROR: An error occurred: {str(e)}"
 
 def get_database_type(app):
     """Return the type of database being used."""
@@ -28,4 +28,4 @@ def get_database_type(app):
     elif database_uri.startswith('mysql'):
         return 'MySQL'
     else:
-        return 'Unknown Database'
+        return 'ERROR: Unknown Database'
