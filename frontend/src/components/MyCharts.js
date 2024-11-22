@@ -248,7 +248,7 @@ export function MyCharts({ accountID, username, firstName }) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={cleanData_bg(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="created_at"/>
+              <XAxis dataKey="created_at" interval={Math.round(chartData.length / 3)}/>
               <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<BG_Tooltip />}/>
               <Legend />
@@ -305,7 +305,7 @@ export function MyCharts({ accountID, username, firstName }) {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={cleanData_id(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="created_at" axisLine="false"/>
+              <XAxis dataKey="created_at" interval={Math.round(chartData.length / 3)}/>
               <YAxis label={{ value: 'units', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<Ins_Tooltip />} />
               <Legend />
