@@ -13,6 +13,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
   const [eveningGlucose, setEveningGlucose] = useState('');
   const [eveningInsulin, setEveningInsulin] = useState('');
   const [open, setOpen] = useState(false);
+  const [entryDateErrorMessage, setEntryDateErrorMessage] = useState(false);
+  const [dosagesErrorMessage, setDosagesErrorMessage] = useState(false);
 
   // Function to clear all the input fields
   const handleClear = () => {
@@ -23,10 +25,14 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
     setAfternoonInsulin('');
     setEveningGlucose('');
     setEveningInsulin('');
+    setEntryDateErrorMessage(false);
+    setDosagesErrorMessage(false);
   };
 
   // Function to handle the submission of the form
   const handleSubmit = async () => {
+    setEntryDateErrorMessage(false);
+    setDosagesErrorMessage(false);
     // Check if all required fields are filled before proceeding
     if (
       entryDate &&
@@ -40,7 +46,7 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
       try {
         // Define the API URL (use the appropriate environment endpoint)
         const apiUrl = 'https://cs6440groupproj.onrender.com/entries';
-
+        
         // Construct the payload
         const payload = {
           account_id: accountID,
@@ -63,11 +69,22 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
         // If the entry is successfully created, open the modal to confirm
         if (response.status === 201) {
           setOpen(true);
+          
         }
       } catch (error) {
         console.error('Error saving entry:', error);
         // Handle error - show a message or do some error logging
       }
+    }
+    setEntryDateErrorMessage(false);
+    setDosagesErrorMessage(false);
+    if (entryDate.length === 0){
+      setEntryDateErrorMessage(true);
+    }
+    if (morningGlucose.length === 0 || morningInsulin.length === 0 || 
+        afternoonGlucose.length === 0 || afternoonInsulin.length === 0 || 
+        eveningGlucose.length === 0 || eveningInsulin.length === 0){
+          setDosagesErrorMessage(true);
     }
   };
 
@@ -81,7 +98,7 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
       <Box display="flex" flexDirection="column" alignItems="center" mt={1}>      
         {/* Date input for entry date */}
         <Box display="flex" alignItems="center" mb={4} gap={3}>
-          <Typography sx={{ fontSize: '20px', letterSpacing: '0.7px'}}>Entry Date</Typography>        
+          <Typography sx={{ fontSize: '20px', letterSpacing: '0.7px'}}>Entry Date *</Typography>        
           <TextField            
             type="date"
             variant="outlined"
@@ -92,7 +109,6 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             required
           />
         </Box>
-
         {/* Grid layout for glucose and insulin inputs by time of day */}
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={3} mb={3}>
           <Box display="flex" alignItems="center" justifyContent="center" sx={{ bgcolor: '#EDFFE0', height: '50px', borderRadius: '5px' }}>
@@ -201,7 +217,18 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
           />
         </Box>
-
+        {/* Display error message if account creation fails */}
+        {entryDateErrorMessage && (
+          <Typography variant="body2" color="error" mt={2}>
+            {"Please add an entry date"}
+          </Typography>
+        )}
+        {dosagesErrorMessage && (
+          <Typography variant="body2" color="error" mt={2}>
+            {"Please enter all dosages"}
+          </Typography>
+        )}
+        
         {/* Buttons to clear inputs or submit the form */}
         <Box display="grid" gridTemplateColumns="repeat(2, 1fr)" gap={5} mt={2}>          
           <Button variant="contained" color="primary" onClick={handleClear} sx={{ fontSize: '17px', backgroundColor: '#7F7F7F', width: '150px', height: '50px' }}>

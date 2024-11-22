@@ -2,7 +2,7 @@ import './App.css';
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Box, Tabs, Tab, Link } from '@mui/material';
-import { MySugarAndInsulin } from './components/MySugarAndInsuline';
+import { MySugarAndInsulin } from './components/MySugarAndInsulin';
 import { MyCharts } from './components/MyCharts';
 import { MyAchievements } from './components/MyAchievements';
 import { CreateAccount } from './components/CreateAccount';
