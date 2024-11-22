@@ -207,6 +207,19 @@ export function MyCharts({ accountID, username, firstName }) {
     }
   };
 
+  const Ins_Tooltip = ({active, payload, label}) => {
+    if (active && payload && payload.length) {
+      let label_clean = label.substring(0, label.length - 2).replace(/-/g, '/');
+      let pretty_date = new Date(label_clean);
+      return(
+      <div className="tooltip">
+        <p><strong>{pretty_date.toDateString()}</strong> {payload[0].payload.tod}</p>
+        <p>Insulin Dosage: {payload[0].value}</p>
+      </div>
+      );
+    }
+  };
+
   return (
     <Box p={3} display="flex" flexDirection="column" alignItems="center">
       {/* Dropdown to select and display the appropriate chart */}
@@ -294,7 +307,7 @@ export function MyCharts({ accountID, username, firstName }) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_at" axisLine="false"/>
               <YAxis label={{ value: 'units', angle: -90, position: 'insideLeft' }}  />
-              <Tooltip />
+              <Tooltip content={<Ins_Tooltip />} />
               <Legend />
               {<Line type="monotone" dataKey="reading" stroke={MORNING} />}
             </LineChart>
