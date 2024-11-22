@@ -11,15 +11,6 @@ export function MyCharts({ accountID, username, firstName }) {
   // State to handle data fetching error
   const [hasError, setHasError] = useState(false);
 
-  // Placeholder data for when user data is unavailable
-  const data = [
-    { created_at: "2009-01-07 00:00:00", bg_morning: 238.00, bg_afternoon: 261.00, bg_evening: 127.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
-    { created_at: "2009-01-08 00:00:00", bg_morning: 258.00, bg_afternoon: 189.00, bg_evening: 262.00, ins_morning: 100.00, ins_afternoon: 500.00, ins_evening: 100.00 },
-    { created_at: "2009-01-09 00:00:00", bg_morning: 168.00, bg_afternoon: 218.00, bg_evening: 103.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
-    { created_at: "2009-01-10 00:00:00", bg_morning: 88.00,  bg_afternoon: 179.00, bg_evening: 174.00, ins_morning: 500.00, ins_afternoon: 500.00, ins_evening: 100.00 },
-    { created_at: "2009-01-11 00:00:00", bg_morning: 261.00, bg_afternoon: 127.00, bg_evening: 258.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
-  ];
-
   // Function to handle dropdown selection change
   const handleChartChange = (event) => {
     setSelectedChart(event.target.value);
@@ -33,12 +24,12 @@ export function MyCharts({ accountID, username, firstName }) {
         setChartData(response.data);
         setHasError(false);
       } else {
-        setChartData(data);
+        setChartData([]);
         setHasError(true);
       }
     } catch (error) {
       console.error('Error fetching chart data:', error);
-      setChartData(data);
+      setChartData([]);
       setHasError(true);
     }
   };
@@ -240,9 +231,9 @@ export function MyCharts({ accountID, username, firstName }) {
 
       <Box position="relative" width="80%" height={500}>
         {/* Display the Blood Glucose line chart if selected */}
-        {selectedChart === 'blood-glucose' && (
+        {chartData.length && selectedChart === 'blood-glucose' && (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData.length ? cleanData_bg(chartData) : cleanData_bg(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={cleanData_bg(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_at"/>
               <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
@@ -260,9 +251,9 @@ export function MyCharts({ accountID, username, firstName }) {
           </ResponsiveContainer>
         )}
         {/* Display the Blood Glucose Split line chart if selected */}
-        {selectedChart === 'blood-glucose-split' && (
+        {chartData.length && selectedChart === 'blood-glucose-split' && (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData.length ? cleanData_bgSplit(chartData) : cleanData_bgSplit(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={cleanData_bgSplit(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_at" axisLine="false"/>
               <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
@@ -284,10 +275,10 @@ export function MyCharts({ accountID, username, firstName }) {
           </ResponsiveContainer>
         )}
         {/* Display the pie chart if selected */}
-        {selectedChart === 'blood-glucose-breakdown' && (
+        {chartData.length && selectedChart === 'blood-glucose-breakdown' && (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <Pie data={chartData.length ? cleanData_bgBreakdown(chartData) : cleanData_bgBreakdown(data)} dataKey="value" innerRadius={100}>
+              <Pie data={cleanData_bgBreakdown(chartData)} dataKey="value" innerRadius={100}>
                 {COLORS.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
@@ -297,9 +288,9 @@ export function MyCharts({ accountID, username, firstName }) {
           </ResponsiveContainer>
         )}
         {/* Display the Insuline Dosage line chart if selected */}
-        {selectedChart === 'insulin-dosages' && (
+        {chartData.length && selectedChart === 'insulin-dosages' && (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData.length ? cleanData_id(chartData) : cleanData_id(data)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={cleanData_id(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_at" axisLine="false"/>
               <YAxis label={{ value: 'units', angle: -90, position: 'insideLeft' }}  />
@@ -310,7 +301,7 @@ export function MyCharts({ accountID, username, firstName }) {
           </ResponsiveContainer>
         )}
         {/* Gray out overlay and "No Record" card if using placeholder data */}
-        {hasError && (
+        {hasError || chartData.length === 0 && (
           <Box
             position="absolute"
             top={0}
@@ -325,7 +316,7 @@ export function MyCharts({ accountID, username, firstName }) {
             <Card sx={{ maxWidth: 400 }}>
               <CardContent>
                 <Typography variant="h6" textAlign="center">
-                  No Record
+                  No Data Yet
                 </Typography>
               </CardContent>
             </Card>
