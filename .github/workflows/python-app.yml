@@ -37,4 +37,5 @@ jobs:
     - name: Run python unit tests with unittest 
       working-directory: ${{ github.workspace }}/backend/test
       run: |
-        python -m unittest discover
+        python3 -m unittest discover -s test -p "appTests.py"
+
