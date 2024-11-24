@@ -44,9 +44,19 @@ class UserAchv(db.Model):
     # Columns
     id = db.Column(db.Integer, primary_key=True)
     account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
-    current_rank = db.Column(db.String(50), nullable=False)
-    current_points = db.Column(db.String(50), nullable=False)
+    current_rank = db.Column(db.String(20), nullable=False)
+    current_points = db.Column(db.Integer, nullable=False)  # Changed from String to Integer
 
     # Add relationship to Account model
     # Allows you to easily retrieve the user associated achievements from the account object
     account = db.relationship('Account', backref=db.backref('user_achv_entry', lazy=True))
+
+# Define the Achievement Chart Table
+class AchvChart(db.Model):
+    __tablename__ = 'achv_chart'
+
+    # Columns
+    id = db.Column(db.Integer, primary_key=True)
+    ranking = db.Column(db.String(20), nullable=False)
+    min_points = db.Column(db.Integer, nullable=False)
+    max_points = db.Column(db.Integer, nullable=False)
