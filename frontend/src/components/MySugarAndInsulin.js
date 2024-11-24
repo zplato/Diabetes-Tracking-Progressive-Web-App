@@ -12,9 +12,13 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
   const [afternoonInsulin, setAfternoonInsulin] = useState('');
   const [eveningGlucose, setEveningGlucose] = useState('');
   const [eveningInsulin, setEveningInsulin] = useState('');
-  const [open, setOpen] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
   const [entryDateErrorMessage, setEntryDateErrorMessage] = useState(false);
   const [dosagesErrorMessage, setDosagesErrorMessage] = useState(false);
+
+  const bg_morn_msg = "Your morning blood glucose is on borderline level. Consult a doctor as soon as possible.";
+  const bg_aft_msg = "Your afternoon blood glucose is on very low level. Seek medical attention immediately.";
+  const bg_eve_msg = "Your evening blood glucose is on normal level. No action needed.";
 
   // Function to clear all the input fields
   const handleClear = () => {
@@ -67,9 +71,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
         });
 
         // If the entry is successfully created, open the modal to confirm
-        if (response.status === 201) {
-          setOpen(true);
-          
+        if (response.status === 200) {
+          setPopupOpen(true);                    
         }
       } catch (error) {
         console.error('Error saving entry:', error);
@@ -89,7 +92,7 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
   };
 
   // Function to handle the closing of the modal
-  const handleClose = () => setOpen(false);
+  const popupClose = () => setPopupOpen(false);
 
   return (
     <Box p={3} display="flex" justifyContent="center" alignItems="center" gap={10}>
@@ -112,7 +115,7 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
         {/* Grid layout for glucose and insulin inputs by time of day */}
         <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={3} mb={3}>
           <Box display="flex" alignItems="center" justifyContent="center" sx={{ bgcolor: '#EDFFE0', height: '50px', borderRadius: '5px' }}>
-            <Typography sx={{ fontSize: '19px', letterSpacing: '0.7px', color: '#333333'}}>Time of Day</Typography>
+            <Typography sx={{ fontSize: '19px', letterSpacing: '0.7px', color: '#333333', pl: 3, pr: 3}}>Time of Day</Typography>
           </Box>
 
           <Box display="flex" alignItems="center" justifyContent="center" sx={{ bgcolor: '#EDFFE0', height: '50px', borderRadius: '5px' }}>
@@ -125,11 +128,12 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
 
           {/* Morning readings inputs */}
           <Box display="flex" alignItems="center">
-            <WbSunny sx={{ mr: 1 , color: 'orange', pl: 3}} /> 
+            <WbSunny sx={{ mr: 1 , color: 'orange', pl: 2}} /> 
             <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Morning</Typography>
-          </Box>
+          </Box>          
           <input
-            placeholder="mg/dl"
+            id="bg_morn"
+            placeholder="mg/dl"            
             type="number"
             value={morningGlucose}
             onChange={(e) => {
@@ -140,9 +144,10 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             max={1000}
             required
             style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
+          />          
           <input
-            placeholder="units"
+            id="ins_morn"
+            placeholder="units"            
             type="number"
             value={morningInsulin}
             onChange={(e) => {
@@ -156,11 +161,12 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
           />
           {/* Afternoon readings inputs */}
           <Box display="flex" alignItems="center">
-            <Cloud sx={{ mr: 1 , color: '#90CFFC', pl: 3}} /> 
+            <Cloud sx={{ mr: 1 , color: '#90CFFC', pl: 2}} /> 
             <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Afternoon</Typography>
-          </Box>
+          </Box>          
           <input
-            placeholder="mg/dl"
+            id="bg_aft"
+            placeholder="mg/dl"            
             type="number"
             value={afternoonGlucose}
             onChange={(e) => {
@@ -171,9 +177,10 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             max={1000}
             required
             style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
+          />          
           <input
-            placeholder="units"
+            id="ins_aft"
+            placeholder="units"            
             type="number"
             value={afternoonInsulin}
             onChange={(e) => {
@@ -187,11 +194,12 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
           />
           {/* Evening readings inputs */}
           <Box display="flex" alignItems="center">
-            <Nightlight sx={{ mr: 1 , color: '#8B79B5', pl: 3}} /> 
+            <Nightlight sx={{ mr: 1 , color: '#8B79B5', pl: 2}} /> 
             <Typography sx={{ fontSize: '17px', letterSpacing: '0.7px', color: 'black' }}>Evening</Typography>
-          </Box>
+          </Box>          
           <input
-            placeholder="mg/dl"
+            id="bg_eve"
+            placeholder="mg/dl"            
             type="number"
             value={eveningGlucose}
             onChange={(e) => {
@@ -202,9 +210,10 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             max={1000}
             required
             style={{ padding: '10px', fontSize: '16px', borderRadius: '4px', border: '1px solid #ccc' }}
-          />
+          />          
           <input
-            placeholder="units"
+            id="ins_eve"
+            placeholder="units"           
             type="number"
             value={eveningInsulin}
             onChange={(e) => {
@@ -241,23 +250,26 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
       </Box>
 
       {/* Modal to confirm successful entry submission */}
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={popupOpen} onClose={popupClose}>
         <Box
           display="flex"
           justifyContent="center"
           alignItems="center"
           minHeight="100vh"
         >
-          <Card sx={{ width: 400, boxShadow: 3 }}>
+          <Card sx={{ width: 600, boxShadow: 3 }}>
             <CardContent>
-              <Typography variant="h5" mb={3} textAlign="center">
-                Your entry has been saved!
-              </Typography>
-              <Typography variant="body1" textAlign="center">
-                Summary Findings
-              </Typography>
-              <Box display="flex" justifyContent="center" mt={3}>
-                <Button variant="contained" color="primary" onClick={handleClose}>
+              <Typography align="left" sx={{ pl: 3, pr: 2, pt: 3, fontSize: '19px', letterSpacing: '0.4px', color: 'black'}}>Your entry has been saved!</Typography>
+              <Typography align="left" sx={{ pl: 3, pr: 2, pt: 3, fontSize: '19px', letterSpacing: '0.7px', color: '#A02B93'}}>Summary Findings</Typography>
+              <Typography align="left" sx={{ pl: 3, pr: 2, pt: 3, fontSize: '17px', letterSpacing: '0.4px', color: 'black' }}>{bg_morn_msg}</Typography>
+              <Typography align="left" sx={{ pl: 3, pr: 2, pt: 2, fontSize: '17px', letterSpacing: '0.4px', color: 'black' }}>{bg_aft_msg}</Typography>
+              <Typography align="left" sx={{ pl: 3, pr: 2, pt: 2, fontSize: '17px', letterSpacing: '0.4px', color: 'black' }}>{bg_eve_msg}</Typography>
+              <Box display="flex" justifyContent="center" mt={4} mb={3}>
+                <Button 
+                  variant="contained"                  
+                  onClick={popupClose}
+                  sx={{ fontSize: '17px', backgroundColor: '#A02B93', width: '150px', height: '50px' }}
+                >
                   Close
                 </Button>
               </Box>
