@@ -1,0 +1,30 @@
+### Render Blueprint ###
+# Infrastructure as Code (IaC) - Exported from Render
+# Blueprint documentation can be seen here: https://render.com/docs/infrastructure-as-code
+#   File can be updated to manage the Infrastructure of the Render Deployment
+#   It Does not automatically update on merges to main branch, see the docs on how to utilize this file
+
+services:
+- type: web
+  name: CS6440GroupProj
+  runtime: python
+  repo: https://github.com/zplato/CS6440GroupProj
+  plan: free
+  envVars:
+  - key: IS_RENDER
+    sync: false
+  - key: ENVIRONMENT
+    sync: false
+  - key: MYSQL_DATABASE_USER
+    sync: false
+  - key: MYSQL_DATABASE_PASSWORD
+    sync: false
+  - key: MYSQL_DATABASE_HOST
+    sync: false
+  - key: MYSQL_DATABASE_DB
+    sync: false
+  region: oregon
+  buildCommand: pip install -r requirements.txt
+  startCommand: gunicorn app:app
+  rootDir: backend/src
+version: "1"
