@@ -48,14 +48,14 @@ export function LoginPage({ onLogin }) {
         } catch (error) {
           // Handle any errors during the login process
           if (error.response && error.response.status === 401) {
-            setErrorMessage('Invalid username or password');
+            setErrorMessage('Invalid username or password.');
           } else {
             setErrorMessage('An error occurred. Please try again later.');
           }
         }
      }
     } else {
-      setErrorMessage('Please provide both username and password');
+      setErrorMessage('Please provide both username and password.');
     }
   };
 
