@@ -48,15 +48,17 @@ export function CreateAccount({ onLogin }) {
       } catch (error) {
         // Handle any errors during the account creation process
         if (error.response && error.response.status === 409) {
-          setErrorMessage('Username already exists');
+          setErrorMessage('Username already exists.');
         } else if (error.response && error.response.status === 400) {
           setErrorMessage(error.response.data.message);
-        } else {
+        } else if (error.response && error.response.status === 500) {
+          setErrorMessage(error.response.data.message);
+        }else {
           setErrorMessage('An error occurred. Please try again later.');
         }
       }
     } else {
-      setErrorMessage('Please fill in all required fields');
+      setErrorMessage('Please fill in all required fields.');
     }
   };
 
