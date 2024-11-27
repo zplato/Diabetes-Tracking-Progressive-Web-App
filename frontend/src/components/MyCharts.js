@@ -198,7 +198,7 @@ export function MyCharts({ accountID, username, firstName }) {
       <div className="tooltip">
         <h4>{label}</h4>
         {payload.map((data, index) => (
-          <p key={index}>{data.name}: {data.value} - {getValueText(data.value)}</p>
+          <p key={index}>{data.name}: {data.value} <sup>mg</sup>&frasl;<sub>dl</sub> - {getValueText(data.value)}</p>
         ))}
       </div>
       );
@@ -211,7 +211,7 @@ export function MyCharts({ accountID, username, firstName }) {
       return(
       <div className="tooltip">
         <p><strong>{label}</strong> {payload[0].payload.tod}</p>
-        <p>Reading: {payload[0].value} - {getValueText(payload[0].value)}</p>
+        <p>Reading: {payload[0].value} <sup>mg</sup>&frasl;<sub>dl</sub> - {getValueText(payload[0].value)}</p>
       </div>
       );
     }
@@ -240,7 +240,7 @@ export function MyCharts({ accountID, username, firstName }) {
       return(
       <div className="tooltip">
         <p><strong>{label}</strong> {payload[0].payload.tod}</p>
-        <p>Insulin Dosage: {payload[0].value}</p>
+        <p>Insulin Dosage: {payload[0].value} units</p>
       </div>
       );
     }
