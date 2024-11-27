@@ -9,6 +9,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import json
 import requests
+from datetime import datetime
+from sqlalchemy import text
 
 # Local Imports
 from common_utils import valid_dob, build_patient_resource
@@ -221,63 +223,122 @@ class CreateUserAccount(Resource):
             db.session.rollback()
             return make_response({"message": "Error creating user achievement. Please try again."}, 500)  # Internal Server Error
 
-
 class UserBgInsResource(Resource):
+    def _add_cache_headers(self, response):
+        """Add no-cache headers to response"""
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
+
+    def _get_bg_ranges(self):
+        """Fetch blood glucose ranges from bg_chart table"""
+        try:
+            query = text("SELECT min_range_mgdl, max_range_mgdl, risk_level, suggested_action FROM bg_chart ORDER BY level_id")
+            result = db.session.execute(query)
+            
+            bg_ranges = []
+            for row in result:
+                # Strip any trailing periods from suggested_action
+                suggested_action = row.suggested_action.rstrip('.')
+                
+                bg_ranges.append({
+                    'min': row.min_range_mgdl,
+                    'max': row.max_range_mgdl,
+                    'risk_level': row.risk_level.lower(),  # Convert to lowercase
+                    'suggested_action': suggested_action
+                })
+            return bg_ranges
+        except Exception as e:
+            print(f"Error fetching bg ranges: {str(e)}")
+            return []
+
+    def _get_bg_message(self, bg_value, time_of_day=None):
+        """Get blood glucose message with formatted output"""
+        if bg_value is None:
+            return None
+            
+        # Round the blood glucose value
+        rounded_bg = round(float(bg_value))
+        bg_ranges = self._get_bg_ranges()
+        
+        for range_info in bg_ranges:
+            if range_info['min'] <= rounded_bg <= range_info['max']:
+                if time_of_day:
+                    return f"{time_of_day} Blood Glucose is on {range_info['risk_level']} level. {range_info['suggested_action']}."
+                return f"{range_info['risk_level'].upper()} - {range_info['suggested_action']}"
+                
+        return 'Invalid blood glucose value'
+
+    def _generate_summary(self, bg_morning, bg_afternoon, bg_evening):
+        """Generate summary messages for blood glucose readings"""
+        summary = []
+        
+        if bg_morning is not None:
+            summary.append(self._get_bg_message(bg_morning, "Morning"))
+            
+        if bg_afternoon is not None:
+            summary.append(self._get_bg_message(bg_afternoon, "Afternoon"))
+            
+        if bg_evening is not None:
+            summary.append(self._get_bg_message(bg_evening, "Evening"))
+            
+        return summary
+
+    def _format_entry_response(self, entry):
+        """Format the entry response with consistent message formatting"""
+        return {
+            'id': entry.id,
+            'account_id': entry.account_id,
+            'created_date': entry.created_at.strftime('%Y-%m-%d'),
+            'bg_morning': entry.bg_morning if entry.bg_morning else None,
+            'bg_morning_message': self._get_bg_message(entry.bg_morning, "Morning"),
+            'bg_afternoon': entry.bg_afternoon if entry.bg_afternoon else None,
+            'bg_afternoon_message': self._get_bg_message(entry.bg_afternoon, "Afternoon"),
+            'bg_evening': entry.bg_evening if entry.bg_evening else None,
+            'bg_evening_message': self._get_bg_message(entry.bg_evening, "Evening"),
+            'ins_morning': entry.ins_morning if entry.ins_morning else None,
+            'ins_afternoon': entry.ins_afternoon if entry.ins_afternoon else None,
+            'ins_evening': entry.ins_evening if entry.ins_evening else None
+        }
+
     def get(self, entry_id=None):
+        """Get one or all entries with formatted messages"""
         if entry_id:
             # Get specific entry
             entry = UserBgIns.query.get_or_404(entry_id)
-            return {
-                'id': entry.id,
-                'account_id': entry.account_id,
-                'created_at': entry.created_at.isoformat(),
-                'updated_at': entry.updated_at.isoformat(),
-                'bg_morning': entry.bg_morning if entry.bg_morning else None,
-                'bg_afternoon': entry.bg_afternoon if entry.bg_afternoon else None,
-                'bg_evening': entry.bg_evening if entry.bg_evening else None,
-                'ins_morning': entry.ins_morning if entry.ins_morning else None,
-                'ins_afternoon': entry.ins_afternoon if entry.ins_afternoon else None,
-                'ins_evening': entry.ins_evening if entry.ins_evening else None
-            }
+            response = make_response(self._format_entry_response(entry))
+            return self._add_cache_headers(response)
         else:
             # Get all entries with optional filtering by account_id
             account_id = request.args.get('account_id', type=int)
             query = UserBgIns.query
             if account_id:
-                # Verify account exists
                 account = Account.query.get(account_id)
                 if not account:
-                    return {
-                        'message': f'Invalid account_id: {account_id}'
-                    }, 400
+                    return self._add_cache_headers(
+                        make_response({"message": f'Invalid account_id: {account_id}'}, 400)
+                    )
                 query = query.filter_by(account_id=account_id)
             entries = query.order_by(UserBgIns.created_at.asc()).all()
-            print(entries)
-            return [{
-                'id': entry.id,
-                'account_id': entry.account_id,
-                'created_at': entry.created_at.isoformat(),
-                'updated_at': entry.updated_at.isoformat(),
-                'bg_morning': entry.bg_morning if entry.bg_morning else None,
-                'bg_afternoon': entry.bg_afternoon if entry.bg_afternoon else None,
-                'bg_evening': entry.bg_evening if entry.bg_evening else None,
-                'ins_morning': entry.ins_morning if entry.ins_morning else None,
-                'ins_afternoon': entry.ins_afternoon if entry.ins_afternoon else None,
-                'ins_evening': entry.ins_evening if entry.ins_evening else None
-            } for entry in entries]
+            response = make_response([self._format_entry_response(entry) for entry in entries])
+            return self._add_cache_headers(response)
 
     def post(self):
+        """Create a new entry with formatted messages and summary"""
         data = request.get_json()
         
         # Validate required fields
         if 'account_id' not in data:
-            return {'message': 'account_id is required'}, 400
+            return self._add_cache_headers(
+                make_response({"message": 'account_id is required'}, 400)
+            )
         
         account = Account.query.get(data['account_id'])
         if not account:
-             return {
-                'message': f'Invalid account_id: {data["account_id"]}'
-            }, 400
+            return self._add_cache_headers(
+                make_response({"message": f'Invalid account_id: {data["account_id"]}'}, 400)
+            )
 
         # Create new entry
         new_entry = UserBgIns(
@@ -293,56 +354,86 @@ class UserBgInsResource(Resource):
         try:
             db.session.add(new_entry)
             db.session.commit()
-            return {
-                'message': 'Entry created successfully',
-                'id': new_entry.id
-            }, 201
+            
+            # Generate response
+            response_data = self._format_entry_response(new_entry)
+            response_data['message'] = 'Entry created successfully'
+            
+            # Add summary messages if any blood glucose values are present
+            if any([new_entry.bg_morning, new_entry.bg_afternoon, new_entry.bg_evening]):
+                response_data['summary'] = self._generate_summary(
+                    new_entry.bg_morning,
+                    new_entry.bg_afternoon,
+                    new_entry.bg_evening
+                )
+            else:
+                response_data['summary'] = []
+            
+            response = make_response(response_data, 201)
+            return self._add_cache_headers(response)
+            
         except Exception as e:
             db.session.rollback()
-            return {'message': f'Error creating entry: {str(e)}'}, 500
+            return self._add_cache_headers(
+                make_response({'message': f'Error creating entry: {str(e)}'}, 500)
+            )
 
     def put(self, entry_id):
+        """Update an existing entry"""
         entry = UserBgIns.query.get_or_404(entry_id)
         data = request.get_json()
 
         if 'account_id' in data:
             account = Account.query.get(data['account_id'])
             if not account:
-                return {
-                    'message': f'Invalid account_id: {data["account_id"]}'
-                }, 400
+                return self._add_cache_headers(
+                    make_response({"message": f'Invalid account_id: {data["account_id"]}'}, 400)
+                )
 
         # Update fields if provided
-        if 'bg_morning' in data:
-            entry.bg_morning = data['bg_morning']
-        if 'bg_afternoon' in data:
-            entry.bg_afternoon = data['bg_afternoon']
-        if 'bg_evening' in data:
-            entry.bg_evening = data['bg_evening']
-        if 'ins_morning' in data:
-            entry.ins_morning = data['ins_morning']
-        if 'ins_afternoon' in data:
-            entry.ins_afternoon = data['ins_afternoon']
-        if 'ins_evening' in data:
-            entry.ins_evening = data['ins_evening']
+        for field in ['bg_morning', 'bg_afternoon', 'bg_evening', 
+                     'ins_morning', 'ins_afternoon', 'ins_evening']:
+            if field in data:
+                setattr(entry, field, data[field])
 
         try:
             db.session.commit()
-            return {'message': 'Entry updated successfully'}, 200
+            response_data = self._format_entry_response(entry)
+            response_data['message'] = 'Entry updated successfully'
+            
+            # Add summary for updated values
+            if any([entry.bg_morning, entry.bg_afternoon, entry.bg_evening]):
+                response_data['summary'] = self._generate_summary(
+                    entry.bg_morning,
+                    entry.bg_afternoon,
+                    entry.bg_evening
+                )
+            else:
+                response_data['summary'] = []
+            
+            response = make_response(response_data, 200)
+            return self._add_cache_headers(response)
+            
         except Exception as e:
             db.session.rollback()
-            return {'message': f'Error updating entry: {str(e)}'}, 500
+            return self._add_cache_headers(
+                make_response({'message': f'Error updating entry: {str(e)}'}, 500)
+            )
 
     def delete(self, entry_id):
+        """Delete an existing entry"""
         entry = UserBgIns.query.get_or_404(entry_id)
         try:
             db.session.delete(entry)
             db.session.commit()
-            return {'message': 'Entry deleted successfully'}, 200
+            return self._add_cache_headers(
+                make_response({'message': 'Entry deleted successfully'}, 200)
+            )
         except Exception as e:
             db.session.rollback()
-            return {'message': f'Error deleting entry: {str(e)}'}, 500
-        
+            return self._add_cache_headers(
+                make_response({'message': f'Error deleting entry: {str(e)}'}, 500)
+            )
 class UserAchievementResource(Resource):
     def get(self):
         """Get user's current achievement status and points needed for next rank
