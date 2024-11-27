@@ -278,7 +278,6 @@ export function MyCharts({ accountID, username, firstName }) {
               <XAxis dataKey="created_date" interval={Math.round(chartData.length / 3)}/>
               <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<BG_TOOLTIP />}/>
-              <Legend />
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="reading" stroke="#811e73" />
               <ReferenceArea y1={0} y2={51} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
@@ -298,7 +297,6 @@ export function MyCharts({ accountID, username, firstName }) {
               <XAxis dataKey="created_date" axisLine="false"/>
               <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<BG_SPLIT_TOOLTIP />}/>
-              <Legend />
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="bg_morning" stroke={MORNING} />
               {/* Line for afternoon blood glucose values */}
@@ -324,6 +322,7 @@ export function MyCharts({ accountID, username, firstName }) {
                 ))}
               </Pie>
               <Tooltip content={<BG_BREAKDOWN_TOOLTIP /> } />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         )}
@@ -335,7 +334,6 @@ export function MyCharts({ accountID, username, firstName }) {
               <XAxis dataKey="created_date" interval={Math.round(chartData.length / 3)}/>
               <YAxis label={{ value: 'units', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<INS_TOOLTIP />} />
-              <Legend />
               {<Line type="monotone" dataKey="reading" stroke={MORNING} />}
             </LineChart>
           </ResponsiveContainer>
