@@ -30,29 +30,31 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
 
   // State variables to track inputs for each time of day and the entry date
   const [entryDate, setEntryDate] = useState(getTodayDate());
-  const [morningGlucose, setMorningGlucose] = useState(0);
-  const [morningInsulin, setMorningInsulin] = useState(0);
-  const [afternoonGlucose, setAfternoonGlucose] = useState(0);
-  const [afternoonInsulin, setAfternoonInsulin] = useState(0);
-  const [eveningGlucose, setEveningGlucose] = useState(0);
-  const [eveningInsulin, setEveningInsulin] = useState(0);
+  const [morningGlucose, setMorningGlucose] = useState('');
+  const [morningInsulin, setMorningInsulin] = useState('');
+  const [afternoonGlucose, setAfternoonGlucose] = useState('');
+  const [afternoonInsulin, setAfternoonInsulin] = useState('');
+  const [eveningGlucose, setEveningGlucose] = useState('');
+  const [eveningInsulin, setEveningInsulin] = useState('');
   const [popupOpen, setPopupOpen] = useState(false);
   const [entryDateErrorMessage, setEntryDateErrorMessage] = useState(false);
   const [dosagesErrorMessage, setDosagesErrorMessage] = useState(false);
-
-  const bg_morn_msg = "Your morning blood glucose is on borderline level. Consult a doctor as soon as possible.";
-  const bg_aft_msg = "Your afternoon blood glucose is on very low level. Seek medical attention immediately.";
-  const bg_eve_msg = "Your evening blood glucose is on normal level. No action needed.";
+  const [bg_morn_msg, setBGMornMsg] = useState('BG Morning: No messages to display.');
+  const [bg_aft_msg, setBGAftMsg] = useState('BG Afternoon: No messages to display.');
+  const [bg_eve_msg, setBGEveMsg] = useState('BG Evening: No messages to display.');
 
   // Function to clear all the input fields
   const handleClear = () => {
     setEntryDate(getTodayDate());
-    setMorningGlucose(0);
-    setMorningInsulin(0);
-    setAfternoonGlucose(0);
-    setAfternoonInsulin(0);
-    setEveningGlucose(0);
-    setEveningInsulin(0);
+    setMorningGlucose('');
+    setMorningInsulin('');
+    setAfternoonGlucose('');
+    setAfternoonInsulin('');
+    setEveningGlucose('');
+    setEveningInsulin('');
+    setBGMornMsg('');
+    setBGAftMsg('');
+    setBGEveMsg('');
     setEntryDateErrorMessage(false);
     setDosagesErrorMessage(false);
   };
@@ -95,9 +97,13 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
         });
 
         // If the entry is successfully created, open the modal to confirm
-        if (response.status === 200) {
+        if (response.status === 201) {
+          // Set BG morning, afternoon, evening msgs in modal notification box
+          setBGMornMsg(response.data.bg_morning_message);
+          setBGAftMsg(response.data.bg_afternoon_message);
+          setBGEveMsg(response.data.bg_evening_message);
           setPopupOpen(true);
-          handleClear();  
+          // Moved handleClear in popupClose()       
         }
       } catch (error) {
         console.error('Error saving entry:', error);
@@ -116,8 +122,11 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
     }
   };
 
-  // Function to handle the closing of the modal
-  const popupClose = () => setPopupOpen(false);
+  // Function to handle the closing of the modal and clear form data
+  const popupClose = () => {   
+    setPopupOpen(false)
+    handleClear();
+  };
 
   return (
     <Box p={3} display="flex" justifyContent="center" alignItems="center" gap={10}>
