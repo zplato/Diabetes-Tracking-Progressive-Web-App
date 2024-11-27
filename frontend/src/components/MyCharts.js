@@ -269,7 +269,7 @@ export function MyCharts({ accountID, username, firstName }) {
 
       <Box position="relative" width="80%" height={500}>
         {/* Display the Blood Glucose line chart if selected */}
-        {chartData.length && selectedChart === 'blood-glucose' && (
+        {selectedChart === 'blood-glucose' && (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={cleanData_bg(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -289,7 +289,7 @@ export function MyCharts({ accountID, username, firstName }) {
           </ResponsiveContainer>
         )}
         {/* Display the Blood Glucose Split line chart if selected */}
-        {chartData.length && selectedChart === 'blood-glucose-split' && (
+        {selectedChart === 'blood-glucose-split' && (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={cleanData_bgSplit(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -313,7 +313,7 @@ export function MyCharts({ accountID, username, firstName }) {
           </ResponsiveContainer>
         )}
         {/* Display the pie chart if selected */}
-        {chartData.length && selectedChart === 'blood-glucose-breakdown' && (
+        {selectedChart === 'blood-glucose-breakdown' && (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <Pie data={cleanData_bgBreakdown(chartData)} dataKey="value" innerRadius={100}>
@@ -326,7 +326,7 @@ export function MyCharts({ accountID, username, firstName }) {
           </ResponsiveContainer>
         )}
         {/* Display the Insulin Dosage line chart if selected */}
-        {chartData.length && selectedChart === 'insulin-dosages' && (
+        {selectedChart === 'insulin-dosages' && (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={cleanData_id(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
