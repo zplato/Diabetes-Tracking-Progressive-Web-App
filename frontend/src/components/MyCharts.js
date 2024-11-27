@@ -6,19 +6,18 @@ import axios from 'axios';
 export function MyCharts({ accountID, username, firstName }) {
   // State to store the currently selected chart type from the dropdown
   const [selectedChart, setSelectedChart] = useState('blood-glucose');
-  // State to store fetched chart data
-  const [chartData, setChartData] = useState([]);
-  // State to handle data fetching error
-  const [hasError, setHasError] = useState(false);
-
-  // Placeholder data for when user data is unavailable
-  const data = [
+  // State to store fetched chart data, initialized with placeholder data
+  const [chartData, setChartData] = useState([
     { created_date: "2009-01-07", bg_morning: 238.00, bg_afternoon: 261.00, bg_evening: 127.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
     { created_date: "2009-01-08", bg_morning: 258.00, bg_afternoon: 189.00, bg_evening: 262.00, ins_morning: 100.00, ins_afternoon: 500.00, ins_evening: 100.00 },
     { created_date: "2009-01-09", bg_morning: 168.00, bg_afternoon: 218.00, bg_evening: 103.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
     { created_date: "2009-01-10", bg_morning: 88.00,  bg_afternoon: 179.00, bg_evening: 174.00, ins_morning: 500.00, ins_afternoon: 500.00, ins_evening: 100.00 },
     { created_date: "2009-01-11", bg_morning: 261.00, bg_afternoon: 127.00, bg_evening: 258.00, ins_morning: 100.00, ins_afternoon: 100.00, ins_evening: 100.00 },
-];
+  ]);
+  // State to handle data fetching error
+  const [hasError, setHasError] = useState(false);
+  // State to indicate loading
+  const [isLoading, setIsLoading] = useState(true);
 
   // Function to handle dropdown selection change
   const handleChartChange = (event) => {
@@ -44,12 +43,10 @@ export function MyCharts({ accountID, username, firstName }) {
         setChartData(parsedData);
         setHasError(false);
       } else {
-        setChartData(data);
         setHasError(true);
       }
     } catch (error) {
       console.error('Error fetching chart data:', error);
-      setChartData(data);
       setHasError(true);
     }
   };
