@@ -223,14 +223,6 @@ class CreateUserAccount(Resource):
             db.session.rollback()
             return make_response({"message": "Error creating user achievement. Please try again."}, 500)  # Internal Server Error
 
-
-from datetime import datetime
-from sqlalchemy import text
-from flask import make_response, request
-from flask_restful import Resource
-from models import Account, UserBgIns
-from db import db
-
 class UserBgInsResource(Resource):
     def _add_cache_headers(self, response):
         """Add no-cache headers to response"""
