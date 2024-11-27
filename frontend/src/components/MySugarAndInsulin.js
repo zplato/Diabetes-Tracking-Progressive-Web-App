@@ -4,14 +4,38 @@ import { WbSunny, Cloud, Nightlight } from '@mui/icons-material';
 import axios from 'axios';
 
 export function MySugarAndInsulin({ accountID, username, firstName }) {
+  // Helper function to get today's date in 'YYYY-MM-DD' format
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Helper function to get number input
+  const numInput = (currentValue, newValue, max) => {
+    const parsedValue = parseInt(newValue);
+    if (isNaN(parsedValue)) {
+      return currentValue;
+    }
+    if (parsedValue < 0) {
+      return 0;
+    }
+    if (parsedValue > max) {
+      return max;
+    }
+    return parsedValue;
+  };
+
   // State variables to track inputs for each time of day and the entry date
-  const [entryDate, setEntryDate] = useState('');
-  const [morningGlucose, setMorningGlucose] = useState('');
-  const [morningInsulin, setMorningInsulin] = useState('');
-  const [afternoonGlucose, setAfternoonGlucose] = useState('');
-  const [afternoonInsulin, setAfternoonInsulin] = useState('');
-  const [eveningGlucose, setEveningGlucose] = useState('');
-  const [eveningInsulin, setEveningInsulin] = useState('');
+  const [entryDate, setEntryDate] = useState(getTodayDate());
+  const [morningGlucose, setMorningGlucose] = useState(0);
+  const [morningInsulin, setMorningInsulin] = useState(0);
+  const [afternoonGlucose, setAfternoonGlucose] = useState(0);
+  const [afternoonInsulin, setAfternoonInsulin] = useState(0);
+  const [eveningGlucose, setEveningGlucose] = useState(0);
+  const [eveningInsulin, setEveningInsulin] = useState(0);
   const [popupOpen, setPopupOpen] = useState(false);
   const [entryDateErrorMessage, setEntryDateErrorMessage] = useState(false);
   const [dosagesErrorMessage, setDosagesErrorMessage] = useState(false);
@@ -22,13 +46,13 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
 
   // Function to clear all the input fields
   const handleClear = () => {
-    setEntryDate('');
-    setMorningGlucose('');
-    setMorningInsulin('');
-    setAfternoonGlucose('');
-    setAfternoonInsulin('');
-    setEveningGlucose('');
-    setEveningInsulin('');
+    setEntryDate(getTodayDate());
+    setMorningGlucose(0);
+    setMorningInsulin(0);
+    setAfternoonGlucose(0);
+    setAfternoonInsulin(0);
+    setEveningGlucose(0);
+    setEveningInsulin(0);
     setEntryDateErrorMessage(false);
     setDosagesErrorMessage(false);
   };
@@ -72,7 +96,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
 
         // If the entry is successfully created, open the modal to confirm
         if (response.status === 200) {
-          setPopupOpen(true);                    
+          setPopupOpen(true);
+          handleClear();  
         }
       } catch (error) {
         console.error('Error saving entry:', error);
@@ -137,8 +162,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             type="number"
             value={morningGlucose}
             onChange={(e) => {
-              const value = Math.max(0, Math.min(1000, parseInt(e.target.value) || 0));
-              setMorningGlucose(value);
+              setMorningGlucose(numInput(morningGlucose, e.target.value, 1000));
+              e.target.value = morningGlucose
             }}
             min={0}
             max={1000}
@@ -151,8 +176,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             type="number"
             value={morningInsulin}
             onChange={(e) => {
-              const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-              setMorningInsulin(value);
+              setMorningInsulin(numInput(morningInsulin, e.target.value, 100));
+              e.target.value = morningInsulin
             }}
             min={0}
             max={100}
@@ -170,8 +195,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             type="number"
             value={afternoonGlucose}
             onChange={(e) => {
-              const value = Math.max(0, Math.min(1000, parseInt(e.target.value) || 0));
-              setAfternoonGlucose(value);
+              setAfternoonGlucose(numInput(afternoonGlucose, e.target.value, 1000));
+              e.target.value = afternoonGlucose
             }}
             min={0}
             max={1000}
@@ -184,8 +209,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             type="number"
             value={afternoonInsulin}
             onChange={(e) => {
-              const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-              setAfternoonInsulin(value);
+              setAfternoonInsulin(numInput(afternoonInsulin, e.target.value, 100));
+              e.target.value = afternoonInsulin
             }}
             min={0}
             max={100}
@@ -203,8 +228,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             type="number"
             value={eveningGlucose}
             onChange={(e) => {
-              const value = Math.max(0, Math.min(1000, parseInt(e.target.value) || 0));
-              setEveningGlucose(value);
+              setEveningGlucose(numInput(eveningGlucose, e.target.value, 1000));
+              e.target.value = eveningGlucose
             }}
             min={0}
             max={1000}
@@ -217,8 +242,8 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
             type="number"
             value={eveningInsulin}
             onChange={(e) => {
-              const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-              setEveningInsulin(value);
+              setEveningInsulin(numInput(eveningInsulin, e.target.value, 100));
+              e.target.value = eveningInsulin
             }}
             min={0}
             max={100}
