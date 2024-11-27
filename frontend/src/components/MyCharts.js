@@ -276,7 +276,7 @@ export function MyCharts({ accountID, username, firstName }) {
             <LineChart data={cleanData_bg(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_date" interval={Math.round(chartData.length / 3)}/>
-              <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
+              <YAxis ticks={[0, 51, 80, 131, 181, 281]} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<BG_TOOLTIP />}/>
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="reading" stroke="#811e73" />
@@ -295,7 +295,7 @@ export function MyCharts({ accountID, username, firstName }) {
             <LineChart data={cleanData_bgSplit(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_date" axisLine="false"/>
-              <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
+              <YAxis ticks={[0, 51, 80, 131, 181, 281]} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
               <Tooltip content={<BG_SPLIT_TOOLTIP />}/>
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="bg_morning" stroke={MORNING} />
