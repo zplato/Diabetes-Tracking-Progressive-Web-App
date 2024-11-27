@@ -45,9 +45,6 @@ export function MyAchievements({ accountID, username, firstName }) {
         <Typography mb={4} sx={{ fontSize: '24px', letterSpacing: '0.7px', color: 'black' }}>
           Good job! Keep it up!
         </Typography>
-        {hasError && (
-          <Typography color="error" mb={2}>Error fetching achievement data. Please try again later.</Typography>
-        )}
         <Card sx={{ flexGrow: 1, bgcolor: '#EDFFE0', p: 2}}>
           <CardContent>
             {/* Achievement information grid */}
@@ -57,21 +54,21 @@ export function MyAchievements({ accountID, username, firstName }) {
                 <StarsIcon sx={{ mr: 1 , color: 'orange', pl: 3}} />
                 <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333' }}>Your Rank</Typography>
               </Box>
-              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? '-' : rank}</Typography>
+              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? '' : rank}</Typography>
 
               {/* Displaying current points */}
               <Box display="flex" alignItems="center">
                 <StarsIcon sx={{ mr: 1 , color: 'orange', pl: 3}} />
                 <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333' }}>Current Points</Typography>
               </Box>
-              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? '-' : currentPoints}</Typography>
+              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? 'No Data Yet' : currentPoints}</Typography>
 
               {/* Displaying points needed to rank up */}
               <Box display="flex" alignItems="center">
                 <StarsIcon sx={{ mr: 1 , color: 'orange', pl: 3}} />
                 <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333' }}>Points to Rank Up</Typography>
               </Box>
-              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? '-' : pointsToRankUp}</Typography>
+              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? '' : pointsToRankUp}</Typography>
             </Box>
           </CardContent>
         </Card>
