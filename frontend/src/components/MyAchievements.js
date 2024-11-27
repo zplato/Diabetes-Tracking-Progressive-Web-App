@@ -1,12 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Typography, Card, CardContent } from '@mui/material';
 import StarsIcon from '@mui/icons-material/Stars';
+import axios from 'axios';
 
 export function MyAchievements({ accountID, username, firstName }) {
-  // Placeholder values for rank and points
-  const rank = "Silver";
-  const currentPoints = 1200;
-  const pointsToRankUp = 300;
+  // State variables for rank, points, and points to rank up
+  const [rank, setRank] = useState('');
+  const [currentPoints, setCurrentPoints] = useState(0);
+  const [pointsToRankUp, setPointsToRankUp] = useState(0);
+  const [hasError, setHasError] = useState(false);
+
+  // Function to fetch achievement data from the API
+  const fetchAchievementData = async () => {
+    try {
+      const response = await axios.get(`https://cs6440groupproj.onrender.com/getUserAchv?account_id=${accountID}`);
+      if (response.status === 200) {
+        setRank(response.data.currentRank);
+        setCurrentPoints(response.data.currentPoints);
+        setPointsToRankUp(response.data.pointsToRankUp);
+        setHasError(false);
+      } else {
+        setHasError(true);
+      }
+    } catch (error) {
+      console.error('Error fetching achievement data:', error);
+      setHasError(true);
+    }
+  };
+
+  useEffect(() => {
+    fetchAchievementData();
+  }, []);
 
   return (
     <Box p={3} display="flex" justifyContent="center" alignItems="center">      
@@ -20,7 +44,10 @@ export function MyAchievements({ accountID, username, firstName }) {
         </Typography>
         <Typography mb={4} sx={{ fontSize: '24px', letterSpacing: '0.7px', color: 'black' }}>
           Good job! Keep it up!
-        </Typography>        
+        </Typography>
+        {hasError && (
+          <Typography color="error" mb={2}>Error fetching achievement data. Please try again later.</Typography>
+        )}
         <Card sx={{ flexGrow: 1, bgcolor: '#EDFFE0', p: 2}}>
           <CardContent>
             {/* Achievement information grid */}
@@ -30,22 +57,21 @@ export function MyAchievements({ accountID, username, firstName }) {
                 <StarsIcon sx={{ mr: 1 , color: 'orange', pl: 3}} />
                 <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333' }}>Your Rank</Typography>
               </Box>
-              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{rank}</Typography>
+              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? '-' : rank}</Typography>
 
               {/* Displaying current points */}
               <Box display="flex" alignItems="center">
                 <StarsIcon sx={{ mr: 1 , color: 'orange', pl: 3}} />
                 <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333' }}>Current Points</Typography>
               </Box>
-              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{currentPoints}</Typography>
+              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? '-' : currentPoints}</Typography>
 
               {/* Displaying points needed to rank up */}
               <Box display="flex" alignItems="center">
                 <StarsIcon sx={{ mr: 1 , color: 'orange', pl: 3}} />
                 <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333' }}>Points to Rank Up</Typography>
               </Box>
-              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{pointsToRankUp}</Typography>
-
+              <Typography sx={{ fontSize: '18px', letterSpacing: '0.7px', color: '#333333', pl: 4 }} textAlign="center">{hasError ? '-' : pointsToRankUp}</Typography>
             </Box>
           </CardContent>
         </Card>
