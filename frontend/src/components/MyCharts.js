@@ -16,8 +16,6 @@ export function MyCharts({ accountID, username, firstName }) {
   ]);
   // State to handle data fetching error
   const [hasError, setHasError] = useState(false);
-  // State to indicate loading
-  const [isLoading, setIsLoading] = useState(true);
 
   // Function to handle dropdown selection change
   const handleChartChange = (event) => {
@@ -194,7 +192,7 @@ export function MyCharts({ accountID, username, firstName }) {
     return fin_data;
   };
 
-  const BGSplit_Tooltip = ({active, payload, label}) => {
+  const BG_SPLIT_TOOLTIP = ({active, payload, label}) => {
     if (active && payload && payload.length) {
       return(
       <div className="tooltip">
@@ -208,7 +206,7 @@ export function MyCharts({ accountID, username, firstName }) {
     return null;
   };
 
-  const BG_Tooltip = ({active, payload, label}) => {
+  const BG_TOOLTIP = ({active, payload, label}) => {
     if (active && payload && payload.length) {
       return(
       <div className="tooltip">
@@ -220,7 +218,7 @@ export function MyCharts({ accountID, username, firstName }) {
     return null;
   };
 
-  const BGBreakdown_Tooltip = ({active, payload, label}) => {
+  const BG_BREAKDOWN_TOOLTIP = ({active, payload, label}) => {
     if (active && payload && payload.length) {
       let tcolor = NORMAL;
       if (payload[0].name === "LOW") {tcolor = LOW;}
@@ -237,7 +235,7 @@ export function MyCharts({ accountID, username, firstName }) {
     return null;
   };
 
-  const Ins_Tooltip = ({active, payload, label}) => {
+  const INS_TOOLTIP = ({active, payload, label}) => {
     if (active && payload && payload.length) {
       return(
       <div className="tooltip">
@@ -279,7 +277,7 @@ export function MyCharts({ accountID, username, firstName }) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_date" interval={Math.round(chartData.length / 3)}/>
               <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
-              <Tooltip content={<BG_Tooltip />}/>
+              <Tooltip content={<BG_TOOLTIP />}/>
               <Legend />
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="reading" stroke="#811e73" />
@@ -299,7 +297,7 @@ export function MyCharts({ accountID, username, firstName }) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_date" axisLine="false"/>
               <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
-              <Tooltip content={<BGSplit_Tooltip />}/>
+              <Tooltip content={<BG_SPLIT_TOOLTIP />}/>
               <Legend />
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="bg_morning" stroke={MORNING} />
@@ -325,7 +323,7 @@ export function MyCharts({ accountID, username, firstName }) {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip content={<BGBreakdown_Tooltip /> } />
+              <Tooltip content={<BG_BREAKDOWN_TOOLTIP /> } />
             </PieChart>
           </ResponsiveContainer>
         )}
@@ -336,7 +334,7 @@ export function MyCharts({ accountID, username, firstName }) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_date" interval={Math.round(chartData.length / 3)}/>
               <YAxis label={{ value: 'units', angle: -90, position: 'insideLeft' }}  />
-              <Tooltip content={<Ins_Tooltip />} />
+              <Tooltip content={<INS_TOOLTIP />} />
               <Legend />
               {<Line type="monotone" dataKey="reading" stroke={MORNING} />}
             </LineChart>
