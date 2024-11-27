@@ -6,8 +6,8 @@ import axios from 'axios';
 export function MyAchievements({ accountID, username, firstName }) {
   // State variables for rank, points, and points to rank up
   const [rank, setRank] = useState('');
-  const [currentPoints, setCurrentPoints] = useState(0);
-  const [pointsToRankUp, setPointsToRankUp] = useState(0);
+  const [currentPoints, setCurrentPoints] = useState('');
+  const [pointsToRankUp, setPointsToRankUp] = useState('');
   const [hasError, setHasError] = useState(false);
 
   // Function to fetch achievement data from the API
