@@ -73,19 +73,19 @@ export function MyCharts({ accountID, username, firstName }) {
     // Defaults to NORMAL
     let level = "NORMAL";
     let tcolor = NORMAL;
-    if (value >= 0 && value < 51) {
+    if (value >= 0 && value <= 50) {
       level = "VERY LOW";
       tcolor = VERY_LOW;
     }
-    else if (value >= 51 && value < 70) {
+    else if (value >= 51 && value <= 79) {
       level = "LOW";
       tcolor = LOW;
     }
-    else if (value >= 109 && value < 180) {
+    else if (value >= 131 && value <= 180) {
       level = "BORDERLINE";
       tcolor = BORDERLINE;
     }
-    else if (value >= 181 && value < 280) {
+    else if (value >= 181 && value <= 280) {
       level = "HIGH";
       tcolor = HIGH;
     }
@@ -162,26 +162,33 @@ export function MyCharts({ accountID, username, firstName }) {
       {name: "HIGH", value: 0},
       {name: "VERY HIGH", value: 0},
     ];
-    
+    console.log(" ");
     for (let i in new_data) {
       let reading = new_data[i]["reading"];
+      console.log(reading);
       if(reading >= 0 && reading <= 50) {
         fin_data[0]["value"] += 1;
+        console.log("\t VERY LOW");
       }
-      else if(reading >= 51 && reading <= 70) {
+      else if(reading >= 51 && reading <= 79) {
         fin_data[1]["value"] += 1;
+        console.log("\t LOW");
       }
-      else if(reading >= 71 && reading <= 108) {
+      else if(reading >= 80 && reading <= 130) {
         fin_data[2]["value"] += 1;
+        console.log("\t NORMAL");
       }
-      else if(reading >= 109 && reading <= 180) {
+      else if(reading >= 131 && reading <= 180) {
         fin_data[3]["value"] += 1;
+        console.log("\t BORDERLINE");
       }
       else if(reading >= 181 && reading <= 280) {
         fin_data[4]["value"] += 1;
+        console.log("\t HIGH");
       }
       else if(reading >= 281) {
         fin_data[5]["value"] += 1;
+        console.log("\t VERY HIGH");
       }
     }
     return fin_data;
@@ -276,12 +283,12 @@ export function MyCharts({ accountID, username, firstName }) {
               <Legend />
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="reading" stroke="#811e73" />
-              <ReferenceArea y1={0} y2={50} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={50} y2={70} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={108} y2={180} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={280} y2={1000} fill={VERY_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={0} y2={51} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={51} y2={80} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={80} y2={131} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={131} y2={181} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={181} y2={281} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={281} y2={1000} fill={VERY_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -300,12 +307,12 @@ export function MyCharts({ accountID, username, firstName }) {
               <Line type="monotone" dataKey="bg_afternoon" stroke={AFTERNOON} />
               {/* Line for evening blood glucose values */}
               <Line type="monotone" dataKey="bg_evening" stroke={EVENING} />
-              <ReferenceArea y1={0} y2={50} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={50} y2={70} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={108} y2={180} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={280} y2={1000} fill={VERY_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={0} y2={51} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={51} y2={80} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={80} y2={131} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={131} y2={181} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={181} y2={281} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={281} y2={1000} fill={VERY_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
             </LineChart>
           </ResponsiveContainer>
         )}
