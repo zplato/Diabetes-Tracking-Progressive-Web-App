@@ -194,7 +194,7 @@ class CreateUserAccount(Resource):
             return make_response({"message": "Error creating user. Please try again."}, 500)  # Internal Server Error
 
         # Add Default User Achievement - Now that the User Account is created and ID is initialized
-        default_rank = "Bronze"
+        default_rank = "BRONZE"
         default_num_points = 0
         default_achievement = UserAchv(
             account_id = new_user.id,
@@ -271,13 +271,11 @@ class UserBgInsResource(Resource):
         
         # Validate required fields
         if 'account_id' not in data:
-            return {'message': 'account_id is required'}, 400
+            return make_response({'message': 'account_id is required'}, 400)
         
-        account = Account.query.get(data['account_id'])
-        if not account:
-             return {
-                'message': f'Invalid account_id: {data["account_id"]}'
-            }, 400
+        account_id = Account.query.get(data['account_id'])
+        if not account_id:
+             return make_response({'message': f'Invalid account_id: {data["account_id"]}'}, 400)
 
         # Create new entry
         new_entry = UserBgIns(
@@ -293,13 +291,25 @@ class UserBgInsResource(Resource):
         try:
             db.session.add(new_entry)
             db.session.commit()
-            return {
-                'message': 'Entry created successfully',
-                'id': new_entry.id
-            }, 201
         except Exception as e:
             db.session.rollback()
-            return {'message': f'Error creating entry: {str(e)}'}, 500
+            return make_response({'message': f'Error creating entry: {str(e)}'}, 500)
+
+        # Now that the entry is saved - increment user achv points
+        try:
+            # Get user's current achievement
+            user_achv = UserAchv.query.filter_by(account_id=account_id).first()
+            if not user_achv:
+                return make_response({"message": f"No achievement record found for account_id: {account_id}"}, 404)
+
+            user_achv.current_points += 5
+            db.session.commit()
+            return make_response({'message': 'Entry created successfully', 'id': new_entry.id}, 201)
+
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"message": f"Error retrieving achievement data: {str(e)}"}, 500)
+
 
     def put(self, entry_id):
         entry = UserBgIns.query.get_or_404(entry_id)
@@ -328,10 +338,29 @@ class UserBgInsResource(Resource):
 
         try:
             db.session.commit()
-            return {'message': 'Entry updated successfully'}, 200
         except Exception as e:
             db.session.rollback()
             return {'message': f'Error updating entry: {str(e)}'}, 500
+
+        # Now that the entry is saved - increment user achv points
+        # Get account_id from query parameters
+        account_id = request.args.get('account_id', type=int)
+
+        try:
+            # Get user's current achievement
+            user_achv = UserAchv.query.filter_by(account_id=account_id).first()
+            if not user_achv:
+                return make_response({"message": f"No achievement record found for account_id: {account_id}"}, 404)
+
+            user_achv.current_points += 5
+            db.session.commit()
+            return  make_response({'message': 'Entry and achievement updated successfully'}, 200)
+
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"message": f"Error retrieving achievement data: {str(e)}"}, 500)
+
+
 
     def delete(self, entry_id):
         entry = UserBgIns.query.get_or_404(entry_id)
