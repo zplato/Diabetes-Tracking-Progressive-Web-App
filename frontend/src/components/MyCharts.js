@@ -16,8 +16,6 @@ export function MyCharts({ accountID, username, firstName }) {
   ]);
   // State to handle data fetching error
   const [hasError, setHasError] = useState(false);
-  // State to indicate loading
-  const [isLoading, setIsLoading] = useState(true);
 
   // Function to handle dropdown selection change
   const handleChartChange = (event) => {
@@ -73,19 +71,19 @@ export function MyCharts({ accountID, username, firstName }) {
     // Defaults to NORMAL
     let level = "NORMAL";
     let tcolor = NORMAL;
-    if (value >= 0 && value < 51) {
+    if (value >= 0 && value <= 50) {
       level = "VERY LOW";
       tcolor = VERY_LOW;
     }
-    else if (value >= 51 && value < 70) {
+    else if (value >= 51 && value <= 79) {
       level = "LOW";
       tcolor = LOW;
     }
-    else if (value >= 109 && value < 180) {
+    else if (value >= 131 && value <= 180) {
       level = "BORDERLINE";
       tcolor = BORDERLINE;
     }
-    else if (value >= 181 && value < 280) {
+    else if (value >= 181 && value <= 280) {
       level = "HIGH";
       tcolor = HIGH;
     }
@@ -162,38 +160,45 @@ export function MyCharts({ accountID, username, firstName }) {
       {name: "HIGH", value: 0},
       {name: "VERY HIGH", value: 0},
     ];
-    
+    console.log(" ");
     for (let i in new_data) {
       let reading = new_data[i]["reading"];
+      console.log(reading);
       if(reading >= 0 && reading <= 50) {
         fin_data[0]["value"] += 1;
+        console.log("\t VERY LOW");
       }
-      else if(reading >= 51 && reading <= 70) {
+      else if(reading >= 51 && reading <= 79) {
         fin_data[1]["value"] += 1;
+        console.log("\t LOW");
       }
-      else if(reading >= 71 && reading <= 108) {
+      else if(reading >= 80 && reading <= 130) {
         fin_data[2]["value"] += 1;
+        console.log("\t NORMAL");
       }
-      else if(reading >= 109 && reading <= 180) {
+      else if(reading >= 131 && reading <= 180) {
         fin_data[3]["value"] += 1;
+        console.log("\t BORDERLINE");
       }
       else if(reading >= 181 && reading <= 280) {
         fin_data[4]["value"] += 1;
+        console.log("\t HIGH");
       }
       else if(reading >= 281) {
         fin_data[5]["value"] += 1;
+        console.log("\t VERY HIGH");
       }
     }
     return fin_data;
   };
 
-  const BGSplit_Tooltip = ({active, payload, label}) => {
+  const BG_SPLIT_TOOLTIP = ({active, payload, label}) => {
     if (active && payload && payload.length) {
       return(
       <div className="tooltip">
         <h4>{label}</h4>
         {payload.map((data, index) => (
-          <p key={index}>{data.name}: {data.value} - {getValueText(data.value)}</p>
+          <p key={index}>{data.name}: {data.value} <sup>mg</sup>&frasl;<sub>dl</sub> - {getValueText(data.value)}</p>
         ))}
       </div>
       );
@@ -201,19 +206,19 @@ export function MyCharts({ accountID, username, firstName }) {
     return null;
   };
 
-  const BG_Tooltip = ({active, payload, label}) => {
+  const BG_TOOLTIP = ({active, payload, label}) => {
     if (active && payload && payload.length) {
       return(
       <div className="tooltip">
         <p><strong>{label}</strong> {payload[0].payload.tod}</p>
-        <p>Reading: {payload[0].value} - {getValueText(payload[0].value)}</p>
+        <p>Reading: {payload[0].value} <sup>mg</sup>&frasl;<sub>dl</sub> - {getValueText(payload[0].value)}</p>
       </div>
       );
     }
     return null;
   };
 
-  const BGBreakdown_Tooltip = ({active, payload, label}) => {
+  const BG_BREAKDOWN_TOOLTIP = ({active, payload, label}) => {
     if (active && payload && payload.length) {
       let tcolor = NORMAL;
       if (payload[0].name === "LOW") {tcolor = LOW;}
@@ -230,12 +235,12 @@ export function MyCharts({ accountID, username, firstName }) {
     return null;
   };
 
-  const Ins_Tooltip = ({active, payload, label}) => {
+  const INS_TOOLTIP = ({active, payload, label}) => {
     if (active && payload && payload.length) {
       return(
       <div className="tooltip">
         <p><strong>{label}</strong> {payload[0].payload.tod}</p>
-        <p>Insulin Dosage: {payload[0].value}</p>
+        <p>Insulin Dosage: {payload[0].value} units</p>
       </div>
       );
     }
@@ -271,17 +276,16 @@ export function MyCharts({ accountID, username, firstName }) {
             <LineChart data={cleanData_bg(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_date" interval={Math.round(chartData.length / 3)}/>
-              <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
-              <Tooltip content={<BG_Tooltip />}/>
-              <Legend />
+              <YAxis ticks={[0, 51, 80, 131, 181, 281]} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
+              <Tooltip content={<BG_TOOLTIP />}/>
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="reading" stroke="#811e73" />
-              <ReferenceArea y1={0} y2={50} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={50} y2={70} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={108} y2={180} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={280} y2={1000} fill={VERY_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={0} y2={51} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={51} y2={80} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={80} y2={131} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={131} y2={181} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={181} y2={281} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={281} y2={1000} fill={VERY_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -291,21 +295,20 @@ export function MyCharts({ accountID, username, firstName }) {
             <LineChart data={cleanData_bgSplit(chartData)} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_date" axisLine="false"/>
-              <YAxis domain={[0, 'dataMax + 20']} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
-              <Tooltip content={<BGSplit_Tooltip />}/>
-              <Legend />
+              <YAxis ticks={[0, 51, 80, 131, 181, 281]} label={{ value: 'mg/dL', angle: -90, position: 'insideLeft' }}  />
+              <Tooltip content={<BG_SPLIT_TOOLTIP />}/>
               {/* Line for morning blood glucose values */}
               <Line type="monotone" dataKey="bg_morning" stroke={MORNING} />
               {/* Line for afternoon blood glucose values */}
               <Line type="monotone" dataKey="bg_afternoon" stroke={AFTERNOON} />
               {/* Line for evening blood glucose values */}
               <Line type="monotone" dataKey="bg_evening" stroke={EVENING} />
-              <ReferenceArea y1={0} y2={50} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={50} y2={70} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={70} y2={108} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={108} y2={180} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={180} y2={280} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
-              <ReferenceArea y1={280} y2={1000} fill={VERY_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={0} y2={51} fill={VERY_LOW} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={51} y2={80} fill={LOW} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={80} y2={131} fill={NORMAL} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={131} y2={181} fill={BORDERLINE} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={181} y2={281} fill={HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
+              <ReferenceArea y1={281} y2={1000} fill={VERY_HIGH} fillOpacity={0.2} ifOverflow='hidden'/>
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -318,7 +321,8 @@ export function MyCharts({ accountID, username, firstName }) {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip content={<BGBreakdown_Tooltip /> } />
+              <Tooltip content={<BG_BREAKDOWN_TOOLTIP /> } />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         )}
@@ -329,8 +333,7 @@ export function MyCharts({ accountID, username, firstName }) {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="created_date" interval={Math.round(chartData.length / 3)}/>
               <YAxis label={{ value: 'units', angle: -90, position: 'insideLeft' }}  />
-              <Tooltip content={<Ins_Tooltip />} />
-              <Legend />
+              <Tooltip content={<INS_TOOLTIP />} />
               {<Line type="monotone" dataKey="reading" stroke={MORNING} />}
             </LineChart>
           </ResponsiveContainer>
