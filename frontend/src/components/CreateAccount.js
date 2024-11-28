@@ -43,7 +43,8 @@ export function CreateAccount({ onLogin }) {
 
         // If the account creation is successful, call the provided onLogin function with the username
         if (response.status === 201) {
-          onLogin(username);
+          // onLogin(username);
+          navigate('/login'); // Redirect to Login page
         }
       } catch (error) {
         // Handle any errors during the account creation process
