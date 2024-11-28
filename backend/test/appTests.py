@@ -119,7 +119,7 @@ class TestCreateUserAccount(unittest.TestCase):
         self.assertIsNotNone(user_achievement, "User achievement should be created for the new user")
 
         # Check that the default rank and points are set correctly
-        self.assertEqual(user_achievement.current_rank, "Bronze")
+        self.assertEqual(user_achievement.current_rank, "BRONZE")
         self.assertEqual(str(user_achievement.current_points), "0")
         print("User Achievement:\n"
               "\taccount_id: {0},\n"
