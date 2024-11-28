@@ -458,7 +458,7 @@ class UserAchievementResource(Resource):
                 return make_response({"message": f"No achievement record found for account_id: {account_id}"}, 404)
             
             # Get achievement chart data for next rank calculation
-            current_rank = user_achv.current_rank.upper()
+            current_rank = user_achv.current_rank.capitalize()  # Normalize to proper case
             current_points = user_achv.current_points
             
             # Get the ranks from achievement chart
@@ -468,11 +468,11 @@ class UserAchievementResource(Resource):
             
             # Calculate points to next rank
             points_to_rank_up = "Max Level!"
-            if current_rank != "GOLD":
-                if current_rank == "BRONZE":
-                    current_rank_max = ranks_map["BRONZE"]["max"]
-                elif current_rank == "SILVER":
-                    current_rank_max = ranks_map["SILVER"]["max"]
+            if current_rank != "Gold":  # Use proper case for comparison
+                if current_rank == "Bronze":
+                    current_rank_max = ranks_map["Bronze"]["max"]
+                elif current_rank == "Silver":
+                    current_rank_max = ranks_map["Silver"]["max"]
                     
                 points_to_rank_up = (current_rank_max - current_points) + 5
                 if points_to_rank_up < 0:
@@ -482,8 +482,8 @@ class UserAchievementResource(Resource):
             response = {
                 "id": user_achv.id,
                 "message": "Achievement data retrieved successfully",
-                "firstName": user_achv.account.first_name,  # Assuming relationship exists in model
-                "currentRank": current_rank,
+                "firstName": user_achv.account.first_name,
+                "currentRank": current_rank,  # Return normalized case
                 "currentPoints": current_points,
                 "pointsToRankUp": points_to_rank_up
             }
