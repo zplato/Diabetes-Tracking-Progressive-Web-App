@@ -273,8 +273,8 @@ class UserBgInsResource(Resource):
         if 'account_id' not in data:
             return make_response({'message': 'account_id is required'}, 400)
         
-        account_id = Account.query.get(data['account_id'])
-        if not account_id:
+        account = Account.query.get(data['account_id'])
+        if not account:
              return make_response({'message': f'Invalid account_id: {data["account_id"]}'}, 400)
 
         # Create new entry
@@ -298,9 +298,9 @@ class UserBgInsResource(Resource):
         # Now that the entry is saved - increment user achv points
         try:
             # Get user's current achievement
-            user_achv = UserAchv.query.filter_by(account_id=account_id).first()
+            user_achv = UserAchv.query.filter_by(account_id=account.id).first()
             if not user_achv:
-                return make_response({"message": f"No achievement record found for account_id: {account_id}"}, 404)
+                return make_response({"message": f"No achievement record found for account_id: {account.id}"}, 404)
 
             user_achv.current_points += 5
             db.session.commit()
