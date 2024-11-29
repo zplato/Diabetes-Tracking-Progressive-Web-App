@@ -236,12 +236,12 @@ class UserBgInsResource(Resource):
         try:
             query = text("SELECT min_range_mgdl, max_range_mgdl, risk_level, suggested_action FROM bg_chart ORDER BY level_id")
             result = db.session.execute(query)
-            
+
             bg_ranges = []
             for row in result:
                 # Strip any trailing periods from suggested_action
                 suggested_action = row.suggested_action.rstrip('.')
-                
+
                 bg_ranges.append({
                     'min': row.min_range_mgdl,
                     'max': row.max_range_mgdl,
@@ -257,32 +257,32 @@ class UserBgInsResource(Resource):
         """Get blood glucose message with formatted output"""
         if bg_value is None:
             return None
-            
+
         # Round the blood glucose value
         rounded_bg = round(float(bg_value))
         bg_ranges = self._get_bg_ranges()
-        
+
         for range_info in bg_ranges:
             if range_info['min'] <= rounded_bg <= range_info['max']:
                 if time_of_day:
                     return f"{time_of_day} Blood Glucose is on {range_info['risk_level']} level. {range_info['suggested_action']}."
                 return f"{range_info['risk_level'].upper()} - {range_info['suggested_action']}"
-                
+
         return 'Invalid blood glucose value'
 
     def _generate_summary(self, bg_morning, bg_afternoon, bg_evening):
         """Generate summary messages for blood glucose readings"""
         summary = []
-        
+
         if bg_morning is not None:
             summary.append(self._get_bg_message(bg_morning, "Morning"))
-            
+
         if bg_afternoon is not None:
             summary.append(self._get_bg_message(bg_afternoon, "Afternoon"))
-            
+
         if bg_evening is not None:
             summary.append(self._get_bg_message(bg_evening, "Evening"))
-            
+
         return summary
 
     def _format_entry_response(self, entry):
@@ -314,7 +314,7 @@ class UserBgInsResource(Resource):
             account_id = request.args.get('account_id', type=int)
             query = UserBgIns.query
             if account_id:
-                account = Account.query.get(account_id)
+                account = db.session.get(Account, account_id)
                 if not account:
                     return self._add_cache_headers(
                         make_response({"message": f'Invalid account_id: {account_id}'}, 400)
@@ -334,7 +334,7 @@ class UserBgInsResource(Resource):
                 make_response({"message": 'account_id is required'}, 400)
             )
         
-        account = Account.query.get(data['account_id'])
+        account = db.session.get(Account, data['account_id'])
         if not account:
             return self._add_cache_headers(
                 make_response({"message": f'Invalid account_id: {data["account_id"]}'}, 400)
@@ -354,11 +354,11 @@ class UserBgInsResource(Resource):
         try:
             db.session.add(new_entry)
             db.session.commit()
-            
+
             # Generate response
             response_data = self._format_entry_response(new_entry)
             response_data['message'] = 'Entry created successfully'
-            
+
             # Add summary messages if any blood glucose values are present
             if any([new_entry.bg_morning, new_entry.bg_afternoon, new_entry.bg_evening]):
                 response_data['summary'] = self._generate_summary(
@@ -368,10 +368,25 @@ class UserBgInsResource(Resource):
                 )
             else:
                 response_data['summary'] = []
-            
+
             response = make_response(response_data, 201)
+            #return self._add_cache_headers(response)
+
+        except Exception as e:
+            db.session.rollback()
+            return make_response({'message': f'Error creating entry: {str(e)}'}, 500)
+
+        # Now that the entry is saved - increment user achv points
+        try:
+            # Get user's current achievement
+            user_achv = UserAchv.query.filter_by(account_id=account.id).first()
+            if not user_achv:
+                return make_response({"message": f"No achievement record found for account_id: {account.id}"}, 404)
+
+            user_achv.current_points += 5
+            db.session.commit()
             return self._add_cache_headers(response)
-            
+
         except Exception as e:
             db.session.rollback()
             return self._add_cache_headers(
@@ -384,14 +399,14 @@ class UserBgInsResource(Resource):
         data = request.get_json()
 
         if 'account_id' in data:
-            account = Account.query.get(data['account_id'])
+            account = db.session.get(Account, data['account_id'])
             if not account:
                 return self._add_cache_headers(
                     make_response({"message": f'Invalid account_id: {data["account_id"]}'}, 400)
                 )
 
         # Update fields if provided
-        for field in ['bg_morning', 'bg_afternoon', 'bg_evening', 
+        for field in ['bg_morning', 'bg_afternoon', 'bg_evening',
                      'ins_morning', 'ins_afternoon', 'ins_evening']:
             if field in data:
                 setattr(entry, field, data[field])
@@ -400,7 +415,7 @@ class UserBgInsResource(Resource):
             db.session.commit()
             response_data = self._format_entry_response(entry)
             response_data['message'] = 'Entry updated successfully'
-            
+
             # Add summary for updated values
             if any([entry.bg_morning, entry.bg_afternoon, entry.bg_evening]):
                 response_data['summary'] = self._generate_summary(
@@ -410,15 +425,32 @@ class UserBgInsResource(Resource):
                 )
             else:
                 response_data['summary'] = []
-            
+
             response = make_response(response_data, 200)
-            return self._add_cache_headers(response)
-            
+            #return self._add_cache_headers(response)
+
         except Exception as e:
             db.session.rollback()
             return self._add_cache_headers(
                 make_response({'message': f'Error updating entry: {str(e)}'}, 500)
             )
+
+        # Now that the entry is saved - increment user achv points
+        try:
+            # Get user's current achievement
+            user_achv = UserAchv.query.filter_by(account_id=entry.account_id).first()
+            if not user_achv:
+                return make_response({"message": f"No achievement record found for account_id: {entry.account_id}"}, 404)
+
+            user_achv.current_points += 5
+            db.session.commit()
+            return self._add_cache_headers(response)
+
+        except Exception as e:
+            db.session.rollback()
+            return make_response({"message": f"Error retrieving achievement data: {str(e)}"}, 500)
+
+
 
     def delete(self, entry_id):
         """Delete an existing entry"""
