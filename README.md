@@ -22,7 +22,7 @@ The Diabetes Tracking Progressive Web App (PWA).
 _Insert high lvl description here_
 
 ## Backend
-_Insert high lvl description here_
+[Backend Docs](/backend/README.md)
 
 ## Deployment
 The deployment of the “MAZNA Tech - Diabetes App for Kids!” is done through a Platform-as-a-Service (PaaS) provider called [Render](https://render.com/about).  Render is a cloud platform designed to provide an easy, scalable solution for deploying and managing modern web applications. The front-end is deployed as a static site, and the backend is deployed as a web-service. Both the frontend and backend can be reached through the following URLs: 

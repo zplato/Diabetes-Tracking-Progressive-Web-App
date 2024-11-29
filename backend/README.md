@@ -39,6 +39,9 @@ Apply your database credentials using your preferred SQL client. If you get the 
 ## Application Program Interface (API)
 The following Endpoints are configured along with a basic description of their functionality:
 
+## Postman Documentation
+https://documenter.getpostman.com/view/4031860/2sAYBXCWzZ
+
 * **Home Endpoint** 
   * URL: `/`
   * Method: `GET`
