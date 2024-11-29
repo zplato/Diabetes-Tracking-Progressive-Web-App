@@ -17,7 +17,7 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
   const numInput = (currentValue, newValue, max) => {
     const parsedValue = parseInt(newValue);
     if (isNaN(parsedValue)) {
-      return currentValue;
+      return 0;
     }
     if (parsedValue < 0) {
       return 0;
