@@ -1,7 +1,8 @@
 from sqlalchemy import Nullable
 
 from db import db
-from datetime import datetime
+from datetime import datetime, timezone
+
 
 # Define the Accounts Table to interact with SQLAlchemy ORM
 class Account(db.Model):
@@ -25,8 +26,8 @@ class UserBgIns(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     bg_morning = db.Column(db.Numeric(18,2))
     bg_afternoon = db.Column(db.Numeric(18,2))
     bg_evening = db.Column(db.Numeric(18,2))
@@ -60,3 +61,15 @@ class AchvChart(db.Model):
     ranking = db.Column(db.String(20), nullable=False)
     min_points = db.Column(db.Integer, nullable=False)
     max_points = db.Column(db.Integer, nullable=False)
+
+class BgChart(db.Model):
+    __tablename__ = 'bg_chart'
+
+    #Columns
+    id = db.Column(db.Integer, primary_key=True)
+    level_id = db.Column(db.Integer, nullable=False)
+    min_range_mgdl = db.Column(db.Integer, nullable=False)
+    max_range_mgdl = db.Column(db.Integer, nullable=False)
+    risk_level = db.Column(db.String(20), nullable=False)
+    suggested_action = db.Column(db.String(50), nullable=False)
+

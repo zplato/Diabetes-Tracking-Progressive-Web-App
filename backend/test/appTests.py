@@ -10,7 +10,7 @@ from werkzeug.security import generate_password_hash
 
 # Internal Imports
 from db import db
-from models import Account, UserAchv, UserBgIns
+from models import Account, UserAchv, UserBgIns, BgChart
 from src.app import app, init_db
 
 
@@ -142,6 +142,7 @@ class TestUserBgInsResource(unittest.TestCase):
             # Add mock data for Account and UserAchv
             mock_account = Account(id=1, username="Jim", password="password")
             mock_achievement = UserAchv(account_id=1, current_rank='Bronze', current_points=0)
+            mock_bgchart = BgChart() # Need to Mock this Empty Table as we check against it as part of the endpoint
             db.session.add(mock_account)
             db.session.add(mock_achievement)
             db.session.commit()
