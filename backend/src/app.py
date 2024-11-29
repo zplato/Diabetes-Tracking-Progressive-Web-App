@@ -436,14 +436,11 @@ class UserBgInsResource(Resource):
             )
 
         # Now that the entry is saved - increment user achv points
-        # Get account_id from query parameters
-        account_id = request.args.get('account_id', type=int)
-
         try:
             # Get user's current achievement
-            user_achv = UserAchv.query.filter_by(account_id=account_id).first()
+            user_achv = UserAchv.query.filter_by(account_id=entry.account_id).first()
             if not user_achv:
-                return make_response({"message": f"No achievement record found for account_id: {account_id}"}, 404)
+                return make_response({"message": f"No achievement record found for account_id: {entry.account_id}"}, 404)
 
             user_achv.current_points += 5
             db.session.commit()

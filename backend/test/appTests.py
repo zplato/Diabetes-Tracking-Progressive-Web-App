@@ -119,7 +119,7 @@ class TestCreateUserAccount(unittest.TestCase):
         self.assertIsNotNone(user_achievement, "User achievement should be created for the new user")
 
         # Check that the default rank and points are set correctly
-        self.assertEqual(user_achievement.current_rank, "BRONZE")
+        self.assertEqual(user_achievement.current_rank, "Bronze")
         self.assertEqual(str(user_achievement.current_points), "0")
         print("User Achievement:\n"
               "\taccount_id: {0},\n"
@@ -145,15 +145,17 @@ class TestUserBgInsResource(unittest.TestCase):
             mock_bgchart = BgChart() # Need to Mock this Empty Table as we check against it as part of the endpoint
             db.session.add(mock_account)
             db.session.add(mock_achievement)
+            # db.session.add(mock_bgchart) # Don't add this else it will result in NOT Null constraint, for now this
+            #   works, but we may need a better workaround in the future or Mock this up entirely
             db.session.commit()
 
-        self.client = self.app.test_client()
+
 
     def tearDown(self):
         """Clean up after each test."""
         with self.app.app_context():
             db.session.remove()
-            # db.drop_all()  # Drop tables - only do this if you're using in-memory db.
+            db.drop_all()  # Drop tables - only do this if you're using in-memory db.
 
     def test_post_entry(self):
         """Test the POST method for creating a new entry."""
@@ -185,7 +187,59 @@ class TestUserBgInsResource(unittest.TestCase):
             achievement = UserAchv.query.filter_by(account_id=1).first()
             self.assertEqual(achievement.current_points, 5)
 
+    def test_put_entry(self):
+        """Test the PUT method for updating an existing entry."""
+        with self.app.app_context():
+            # Create a mock entry to update
+            mock_entry = UserBgIns(
+                account_id=1,
+                bg_morning=80.0,
+                bg_afternoon=85.0,
+                bg_evening=90.0,
+                ins_morning=5.0,
+                ins_afternoon=6.0,
+                ins_evening=7.0
+            )
+            db.session.add(mock_entry)
+            db.session.commit()
 
+            # Prepare payload with updated data
+            # Note - account_id is passed as a query param, e.g., entries/{mock_entry.id}
+            payload = {
+                "bg_morning": 95.5,
+                "bg_afternoon": 100.2,
+                "bg_evening": 90.3,
+                "ins_morning": 10.0,
+                "ins_afternoon": 12.0,
+                "ins_evening": 8.0
+            }
+
+            # Send PUT request to update the entry
+            response = self.client.put(
+                f'/entries/{mock_entry.id}',
+                data=json.dumps(payload),
+                content_type='application/json'
+            )
+
+            self.assertEqual(response.status_code, 200)
+
+            # Verify the entry is updated
+            updated_entry = db.session.get(UserBgIns, mock_entry.id)
+            self.assertEqual(float(updated_entry.bg_morning), 95.5)
+            self.assertEqual(float(updated_entry.bg_afternoon), 100.2)
+            self.assertEqual(float(updated_entry.bg_evening), 90.3)
+            self.assertEqual(float(updated_entry.ins_morning), 10.0)
+            self.assertEqual(float(updated_entry.ins_afternoon), 12.0)
+            self.assertEqual(float(updated_entry.ins_evening), 8.0)
+
+            # Verify the summary message
+            response_data = response.get_json()
+            self.assertIn("summary", response_data)
+            self.assertTrue(len(response_data["summary"]) > 0)
+
+            # Verify the achievement points are updated
+            achievement = UserAchv.query.filter_by(account_id=1).first()
+            self.assertEqual(achievement.current_points, 5)  # Incremented by 5
 
 
 if __name__ == '__main__':
