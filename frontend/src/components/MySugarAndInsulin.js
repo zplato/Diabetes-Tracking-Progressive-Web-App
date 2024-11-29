@@ -16,16 +16,7 @@ export function MySugarAndInsulin({ accountID, username, firstName }) {
   // Helper function to get number input
   const numInput = (currentValue, newValue, max) => {
     const parsedValue = parseInt(newValue);
-    if (isNaN(parsedValue)) {
-      return 0;
-    }
-    if (parsedValue < 0) {
-      return 0;
-    }
-    if (parsedValue > max) {
-      return max;
-    }
-    return parsedValue;
+    return isNaN(parsedValue) ? 0 : Math.max(0, Math.min(1000, parsedValue))
   };
 
   // State variables to track inputs for each time of day and the entry date
