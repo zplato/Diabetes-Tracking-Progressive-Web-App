@@ -302,6 +302,34 @@ class UserBgInsResource(Resource):
             'ins_evening': entry.ins_evening if entry.ins_evening else None
         }
 
+    def _update_user_rank(self, user_achv):
+        """
+        Update user rank based on current points
+        Returns the new rank if changed, None if no change
+        """
+        try:
+            # Get the ranks from achievement chart
+            achv_chart = AchvChart.query.all()
+            current_points = user_achv.current_points
+
+            # Find appropriate rank for current points
+            new_rank = None
+            for record in achv_chart:
+                if record.min_points <= current_points <= record.max_points:
+                    new_rank = record.ranking
+                    break
+
+            if new_rank and new_rank.lower() != user_achv.current_rank.lower():
+                user_achv.current_rank = new_rank
+                return new_rank
+            
+            return None
+
+        except Exception as e:
+            print(f"Error updating rank: {str(e)}")
+            return None
+        
+
     def get(self, entry_id=None):
         """Get one or all entries with formatted messages"""
         if entry_id:
@@ -384,6 +412,10 @@ class UserBgInsResource(Resource):
                 return make_response({"message": f"No achievement record found for account_id: {account.id}"}, 404)
 
             user_achv.current_points += 5
+
+            # Check and update rank if needed
+            new_rank = self._update_user_rank(user_achv)
+
             db.session.commit()
             return self._add_cache_headers(response)
 
@@ -443,6 +475,10 @@ class UserBgInsResource(Resource):
                 return make_response({"message": f"No achievement record found for account_id: {entry.account_id}"}, 404)
 
             user_achv.current_points += 5
+
+            # Check and update rank if needed
+            new_rank = self._update_user_rank(user_achv)
+            
             db.session.commit()
             return self._add_cache_headers(response)
 
