@@ -19,7 +19,7 @@ This is a graduate group project for the Georgia Institute of Technology (GaTech
 The Diabetes Tracking Progressive Web App (PWA).
 
 ## Frontend 
-_Insert high lvl description here_
+https://github.com/zplato/CS6440GroupProj/blob/main/frontend/README.md
 
 ## Backend
 [Backend Docs](/backend/README.md)
